@@ -1,9 +1,9 @@
+import { PrismaService } from '@/shared/services/prisma.service'
 import { Module } from '@nestjs/common'
-import { SharedController } from './shared.controller'
-import { SharedService } from './shared.service'
 
+const sharedServices = [PrismaService]
 @Module({
-  controllers: [SharedController],
-  providers: [SharedService]
+  controllers: [],
+  providers: [...sharedServices]
 })
 export class SharedModule {}
