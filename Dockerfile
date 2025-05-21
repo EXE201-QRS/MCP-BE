@@ -11,8 +11,15 @@ RUN pnpm install
 
 COPY . .
 
+# Generate Prisma client before building
+RUN npx prisma generate
+
+# Build the application
 RUN pnpm build
 
 EXPOSE 5000
+
+# Use production node environment by default
+ENV NODE_ENV production
 
 CMD [ "pnpm", "start" ]
