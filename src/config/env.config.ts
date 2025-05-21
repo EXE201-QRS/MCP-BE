@@ -24,11 +24,12 @@ const configSchema = z.object({
   ACCESS_TOKEN_SECRET: z.string(),
   ACCESS_TOKEN_EXPIRES_IN: z.string(),
   REFRESH_TOKEN_SECRET: z.string(),
-  REFRESH_TOKEN_EXPIRES_IN: z.string()
-  // ADMIN_NAME: z.string(),
-  // ADMIN_PASSWORD: z.string(),
-  // ADMIN_EMAIL: z.string(),
-  // ADMIN_PHONE_NUMBER: z.string(),
+  REFRESH_TOKEN_EXPIRES_IN: z.string(),
+  ADMIN_NAME: z.string(),
+  ADMIN_PASSWORD: z.string(),
+  ADMIN_EMAIL: z.string(),
+  ADMIN_PHONE: z.string(),
+  SECRET_API_KEY: z.string()
   // OTP_EXPIRES_IN: z.string(),
   // RESEND_API_KEY: z.string(),
   // GOOGLE_CLIENT_ID: z.string(),
