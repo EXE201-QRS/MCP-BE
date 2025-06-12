@@ -1,17 +1,18 @@
+import { AUTH_MESSAGE } from '@/common/constants/auth.constant'
 import {
   EmailNotFoundException,
-  RefreshTokenAlreadyUsedException,
+  SessionTokenAlreadyUsedException,
   UnauthorizedAccessException
 } from '@/routes/auth/auth.error'
-import { LoginBodyType, RefreshTokenBodyType } from '@/routes/auth/auth.model'
+import { LoginBodyType } from '@/routes/auth/auth.model'
 import { AuthRepository } from '@/routes/auth/auth.repository'
 import { InvalidPasswordException } from '@/shared/error'
 import { isNotFoundPrismaError } from '@/shared/helpers'
 import { SharedUserRepository } from '@/shared/repositories/shared-user.repo'
 import { HashingService } from '@/shared/services/hashing.service'
 import { TokenService } from '@/shared/services/token.service'
-import { AccessTokenPayloadCreate } from '@/shared/types/jwt.type'
-import { HttpException, Injectable } from '@nestjs/common'
+import { SessionTokenPayloadCreate } from '@/shared/types/jwt.type'
+import { Injectable } from '@nestjs/common'
 
 @Injectable()
 export class AuthService {
@@ -46,95 +47,54 @@ export class AuthService {
       ip: body.ip
     })
 
-    // 4. Tạo mới accessToken và refreshToken
+    // 4. Tạo mới session token
     const tokens = await this.generateTokens({
       userId: user.id,
-      deviceId: device.id
+      deviceId: device.id,
+      name: user.name
     })
-    return tokens
-  }
-
-  async generateTokens({ userId, deviceId }: AccessTokenPayloadCreate) {
-    const [accessToken, refreshToken] = await Promise.all([
-      this.tokenService.signAccessToken({
-        userId,
-        deviceId
-      }),
-      this.tokenService.signRefreshToken({
-        userId
-      })
-    ])
-    const decodedRefreshToken = await this.tokenService.verifyRefreshToken(refreshToken)
-    await this.authRepository.createRefreshToken({
-      token: refreshToken,
-      userId,
-      expiresAt: new Date(decodedRefreshToken.exp * 1000),
-      deviceId
-    })
-    return { accessToken, refreshToken }
-  }
-
-  async refreshToken({
-    refreshToken,
-    userAgent,
-    ip
-  }: RefreshTokenBodyType & { userAgent: string; ip: string }) {
-    try {
-      // 1. Kiểm tra refreshToken có hợp lệ không
-      const { userId } = await this.tokenService.verifyRefreshToken(refreshToken)
-      // 2. Kiểm tra refreshToken có tồn tại trong database không
-      const refreshTokenInDb = await this.authRepository.findUniqueRefreshToken({
-        token: refreshToken
-      })
-      if (!refreshTokenInDb) {
-        // Trường hợp đã refresh token rồi, hãy thông báo cho user biết
-        // refresh token của họ đã bị đánh cắp
-        throw RefreshTokenAlreadyUsedException
-      }
-      const { deviceId, user } = refreshTokenInDb
-      // 3. Cập nhật device
-      const $updateDevice = this.authRepository.updateDevice(deviceId, {
-        ip,
-        userAgent
-      })
-      // 4. Xóa refreshToken cũ
-      const $deleteRefreshToken = this.authRepository.deleteRefreshToken({
-        token: refreshToken
-      })
-      // 5. Tạo mới accessToken và refreshToken
-      const $tokens = this.generateTokens({ userId, deviceId })
-      const [, , tokens] = await Promise.all([
-        $updateDevice,
-        $deleteRefreshToken,
-        $tokens
-      ])
-      return tokens
-    } catch (error) {
-      if (error instanceof HttpException) {
-        throw error
-      }
-      throw UnauthorizedAccessException
+    return {
+      data: tokens,
+      message: AUTH_MESSAGE.LOGIN_SUCCESS
     }
   }
 
-  async logout(refreshToken: string) {
+  async generateTokens({ userId, deviceId, name }: SessionTokenPayloadCreate) {
+    const sessionToken = await this.tokenService.signSessionToken({
+      userId,
+      deviceId,
+      name
+    })
+
+    const decodedSessionToken = await this.tokenService.verifySessionToken(sessionToken)
+    await this.authRepository.createSessionToken({
+      token: sessionToken,
+      userId,
+      name,
+      expiresAt: new Date(decodedSessionToken.exp * 1000),
+      deviceId
+    })
+    return { sessionToken }
+  }
+
+  async logout(sessionToken: string) {
     try {
       // 1. Kiểm tra refreshToken có hợp lệ không
-      await this.tokenService.verifyRefreshToken(refreshToken)
+      await this.tokenService.verifySessionToken(sessionToken)
       // 2. Xóa refreshToken trong database
-      const deletedRefreshToken = await this.authRepository.deleteRefreshToken({
-        token: refreshToken
+      const deletedSessionToken = await this.authRepository.deleteSessionToken({
+        token: sessionToken
       })
       // 3. Cập nhật device là đã logout
-      await this.authRepository.updateDevice(deletedRefreshToken.deviceId, {
+      await this.authRepository.updateDevice(deletedSessionToken.deviceId, {
         isActive: false
       })
-      return { message: 'Đăng xuất thành công' }
+      return { message: AUTH_MESSAGE.LOGOUT_SUCCESS }
     } catch (error) {
       // Trường hợp đã refresh token rồi, hãy thông báo cho user biết
       // refresh token của họ đã bị đánh cắp
       if (isNotFoundPrismaError(error)) {
-        throw RefreshTokenAlreadyUsedException
+        throw SessionTokenAlreadyUsedException
       }
       throw UnauthorizedAccessException
     }
