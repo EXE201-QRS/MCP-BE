@@ -31,3 +31,8 @@ export const TypeOfVerificationCode = {
 
 export type TypeOfVerificationCodeType =
   (typeof TypeOfVerificationCode)[keyof typeof TypeOfVerificationCode]
+
+export const AUTH_MESSAGE = {
+  LOGIN_SUCCESS: 'Login successful',
+  LOGOUT_SUCCESS: 'Logout successful'
+}

@@ -1,18 +1,10 @@
-export interface AccessTokenPayloadCreate {
+export interface SessionTokenPayloadCreate {
   userId: number
   deviceId: number
+  name: string
 }
 
-export interface AccessTokenPayload extends AccessTokenPayloadCreate {
-  exp: number
-  iat: number
-}
-
-export interface RefreshTokenPayloadCreate {
-  userId: number
-}
-
-export interface RefreshTokenPayload extends RefreshTokenPayloadCreate {
+export interface SessionTokenPayload extends SessionTokenPayloadCreate {
   exp: number
   iat: number
 }

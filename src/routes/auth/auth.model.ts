@@ -7,17 +7,15 @@ export const LoginBodySchema = UserSchema.pick({
 }).strict()
 
 export const LoginResSchema = z.object({
-  accessToken: z.string(),
-  refreshToken: z.string()
+  data: z.object({ sessionToken: z.string() }),
+  message: z.string()
 })
 
-export const RefreshTokenBodySchema = z
+export const SessionTokenBodySchema = z
   .object({
-    refreshToken: z.string()
+    sessionToken: z.string()
   })
   .strict()
-
-export const RefreshTokenResSchema = LoginResSchema
 
 export const DeviceSchema = z.object({
   id: z.number(),
@@ -29,21 +27,21 @@ export const DeviceSchema = z.object({
   isActive: z.boolean()
 })
 
-export const RefreshTokenSchema = z.object({
+export const SessionTokenSchema = z.object({
   token: z.string(),
   userId: z.number(),
+  name: z.string(),
   deviceId: z.number(),
   expiresAt: z.date(),
   createdAt: z.date()
 })
 
-export const LogoutBodySchema = RefreshTokenBodySchema
+export const LogoutBodySchema = SessionTokenBodySchema
 
 //type
 export type LoginBodyType = z.infer<typeof LoginBodySchema>
 export type LoginResType = z.infer<typeof LoginResSchema>
-export type RefreshTokenType = z.infer<typeof RefreshTokenSchema>
-export type RefreshTokenBodyType = z.infer<typeof RefreshTokenBodySchema>
-export type RefreshTokenResType = LoginResType
+export type SessionTokenType = z.infer<typeof SessionTokenSchema>
+export type SessionTokenBodyType = z.infer<typeof SessionTokenBodySchema>
 export type DeviceType = z.infer<typeof DeviceSchema>
-export type LogoutBodyType = RefreshTokenBodyType
+export type LogoutBodyType = SessionTokenBodyType
