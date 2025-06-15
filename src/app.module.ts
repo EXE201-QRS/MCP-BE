@@ -8,11 +8,18 @@ import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core'
 import { ZodSerializerInterceptor } from 'nestjs-zod'
 import { AuthModule } from './routes/auth/auth.module'
 import { CustomerFormModule } from './routes/customer-form/customer-form.module'
+import { ServerModule } from './routes/server/server.module'
 import { ServicePlanModule } from './routes/service-plan/service-plan.module'
 import { SharedModule } from './shared/shared.module'
 
 @Module({
-  imports: [SharedModule, AuthModule, ServicePlanModule, CustomerFormModule],
+  imports: [
+    SharedModule,
+    AuthModule,
+    ServicePlanModule,
+    CustomerFormModule,
+    ServerModule
+  ],
   controllers: [],
   providers: [
     AccessTokenGuard,

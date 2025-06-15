@@ -21,4 +21,14 @@ export const CUSTOMER_FORM_MESSAGE = {
   PRICE_IS_INVALID: 'Giá mẫu yêu cầu khách hàng không hợp lệ',
   DURATION_IS_INVALID: 'Thời gian sử dụng mẫu yêu cầu khách hàng không hợp lệ',
   SERVICE_PLAN_ID_IS_INVALID: 'ID gói dịch vụ không hợp lệ'
-}
+} as const
+
+export const SERVER_MESSAGE = {
+  CREATED_SUCCESSFUL: 'Tạo máy chủ thành công',
+  UPDATED_SUCCESSFUL: 'Cập nhật máy chủ thành công',
+  DELETED_SUCCESSFUL: 'Xóa máy chủ thành công',
+  GET_ALL_SUCCESSFUL: 'Lấy danh sách máy chủ thành công',
+  GET_DETAIL_SUCCESSFUL: 'Lấy chi tiết máy chủ thành công',
+  ID_IS_INVALID: 'ID máy chủ không hợp lệ',
+  CUSTOMER_FORM_ID_IS_INVALID: 'ID form khách dịch vụ không hợp lệ'
+} as const
