@@ -32,3 +32,13 @@ export const SERVER_MESSAGE = {
   ID_IS_INVALID: 'ID máy chủ không hợp lệ',
   CUSTOMER_FORM_ID_IS_INVALID: 'ID form khách dịch vụ không hợp lệ'
 } as const
+
+export const REVIEW_MESSAGE = {
+  CREATED_SUCCESSFUL: 'Tạo đánh giá thành công',
+  UPDATED_SUCCESSFUL: 'Cập nhật đánh giá thành công',
+  DELETED_SUCCESSFUL: 'Xóa đánh giá thành công',
+  GET_ALL_SUCCESSFUL: 'Lấy danh sách đánh giá thành công',
+  GET_DETAIL_SUCCESSFUL: 'Lấy chi tiết đánh giá thành công',
+  ID_IS_INVALID: 'ID đánh giá không hợp lệ',
+  CUSTOMER_FORM_ID_IS_INVALID: 'ID form khách dịch vụ không hợp lệ'
+}
