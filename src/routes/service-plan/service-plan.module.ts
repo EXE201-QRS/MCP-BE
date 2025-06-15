@@ -1,0 +1,12 @@
+import { Module } from '@nestjs/common'
+import { ServicePlanController } from './service-plan.controller'
+import { ServicePlanRepo } from './service-plan.repo'
+import { ServicePlanService } from './service-plan.service'
+
+@Module({
+  imports: [],
+  controllers: [ServicePlanController],
+  providers: [ServicePlanService, ServicePlanRepo],
+  exports: [ServicePlanService]
+})
+export class ServicePlanModule {}
