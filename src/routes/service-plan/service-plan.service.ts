@@ -26,7 +26,7 @@ export class ServicePlanService {
     }
     return {
       data: servicePlan,
-      message: 'Lấy danh mục thành công'
+      message: SERVICE_PLAN_MESSAGE.GET_DETAIL_SUCCESSFUL
     }
   }
 

@@ -17,9 +17,12 @@ model User {
   Device        Device[]
   sessionTokens SessionToken[]
 
-  createdServicePlans ServicePlan[] @relation("ServicePlanCreatedBy")
-  updatedServicePlans ServicePlan[] @relation("ServicePlanUpdatedBy")
-  deletedServicePlans ServicePlan[] @relation("ServicePlanDeletedBy")
+  createdServicePlans  ServicePlan[]  @relation("ServicePlanCreatedBy")
+  updatedServicePlans  ServicePlan[]  @relation("ServicePlanUpdatedBy")
+  deletedServicePlans  ServicePlan[]  @relation("ServicePlanDeletedBy")
+  createdCustomerForms CustomerForm[] @relation("CustomerFormCreatedBy")
+  updatedCustomerForms CustomerForm[] @relation("CustomerFormUpdatedBy")
+  deletedCustomerForms CustomerForm[] @relation("CustomerFormDeletedBy")
 
   // 1 user có thể tạo ra nhiều user khác
   // 1 user chỉ có thể được tạo ra bởi 1 user khác
@@ -68,11 +71,12 @@ model Device {
 }
 
 model ServicePlan {
-  id           Int          @id @default(autoincrement())
-  name         String       @unique @db.VarChar(100)
-  price        Float        @default(0.0)
-  description  String       @db.VarChar(500)
-  durationDays PlanDuration @default(ONE_MONTH)
+  id            Int            @id @default(autoincrement())
+  name          String         @unique @db.VarChar(100)
+  price         Float          @default(0.0)
+  description   String         @db.VarChar(500)
+  durationDays  PlanDuration   @default(ONE_MONTH)
+  customerForms CustomerForm[]
 
   createdById Int?
   createdBy   User? @relation("ServicePlanCreatedBy", fields: [createdById], references: [id], onDelete: SetNull, onUpdate: NoAction)
@@ -86,6 +90,42 @@ model ServicePlan {
   updatedAt DateTime  @updatedAt
 
   @@index([deletedAt])
+}
+
+model CustomerForm {
+  id            Int         @id @default(autoincrement())
+  name          String      @db.VarChar(100)
+  phone         String      @db.VarChar(50)
+  email         String      @db.VarChar(100)
+  address       String      @db.VarChar(500)
+  businessName  String      @db.VarChar(100)
+  note          String?     @db.VarChar(500)
+  status        FormStatus  @default(PENDING)
+  startDate     DateTime?
+  endDate       DateTime?
+  servicePlanId Int
+  servicePlan   ServicePlan @relation(fields: [servicePlanId], references: [id], onDelete: SetNull, onUpdate: NoAction)
+
+  createdById Int?
+  createdBy   User? @relation("CustomerFormCreatedBy", fields: [createdById], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  updatedById Int?
+  updatedBy   User? @relation("CustomerFormUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  deletedById Int?
+  deletedBy   User? @relation("CustomerFormDeletedBy", fields: [deletedById], references: [id], onDelete: SetNull, onUpdate: NoAction)
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([deletedAt])
+}
+
+enum FormStatus {
+  PENDING
+  PROCESSING
+  PAID
+  COMPLETED
+  REJECTED
 }
 
 enum PlanDuration {
