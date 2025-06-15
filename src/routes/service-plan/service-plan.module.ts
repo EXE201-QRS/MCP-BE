@@ -7,6 +7,6 @@ import { ServicePlanService } from './service-plan.service'
   imports: [],
   controllers: [ServicePlanController],
   providers: [ServicePlanService, ServicePlanRepo],
-  exports: [ServicePlanService]
+  exports: [ServicePlanService, ServicePlanRepo]
 })
 export class ServicePlanModule {}

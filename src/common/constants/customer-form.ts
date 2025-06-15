@@ -1,0 +1,7 @@
+export const FormStatus = {
+  PENDING: 'PENDING',
+  PROCESSING: 'PROCESSING',
+  PAID: 'PAID',
+  COMPLETED: 'COMPLETED',
+  REJECTED: 'REJECTED'
+}
