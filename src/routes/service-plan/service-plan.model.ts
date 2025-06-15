@@ -1,5 +1,5 @@
 import { SERVICE_PLAN_MESSAGE } from '@/common/constants/message'
-import { PlanDuration } from '@/common/constants/service-plan'
+import { PlanDuration } from '@/common/constants/service-plan.constant'
 import { checkIdSchema } from '@/shared/utils/id.validation'
 import { z } from 'zod'
 
