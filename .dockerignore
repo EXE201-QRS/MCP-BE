@@ -4,4 +4,4 @@ test
 .dockerignore
 Dockerfile
 README.md
-initialScript/
+/initialScript

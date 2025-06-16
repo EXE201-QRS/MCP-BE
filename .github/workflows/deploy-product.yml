@@ -24,46 +24,39 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
             # Tạo thư mục app nếu chưa tồn tại
-            mkdir -p ~/qos-mcp-api
+            mkdir -p ~/mcp-qos-api
 
             # Di chuyển vào thư mục ứng dụng
-            cd ~/qos-mcp-api
+            cd ~/mcp-qos-api
 
             # Kiểm tra nếu file docker-compose.yml không tồn tại, tạo file mới
             if [ ! -f docker-compose.yml ]; then
               cat > docker-compose.yml << 'EOL'
-            version: '3.8'
-
             services:
-              qos-mcp-api:
-                image: ${{ secrets.DOCKER_HUB_USERNAME }}/qos-mcp-api:latest
+              mcp-qos-api:
+                image: ${{ secrets.DOCKER_HUB_USERNAME }}/mcp-qos-api:latest
                 ports:
-                  - "5000:5000"
+                  - "6000:6000"
                 restart: always
                 env_file:
                   - .env
             EOL
             fi
 
-            # Tạo backup file .env nếu đã tồn tại
-            if [ -f .env ]; then
-              cp .env .env.backup.$(date +%Y%m%d%H%M%S)
-            fi
-
             # Tạo file .env từ secret
-            echo "${{secrets.ENV_PRODUCTION}}" | base64 -d > .env
+            echo "${{ secrets.ENV_PRODUCTION }}" | base64 -d > .env
 
             # Dừng container hiện tại nếu có
-            docker-compose down || true
+            docker compose down || true
 
             # Pull image mới nhất
-            docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/qos-mcp-api:latest
+            docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/mcp-qos-api:latest
 
             # Khởi động lại ứng dụng
-            docker-compose up -d
+            docker compose up -d
 
             # Hiển thị logs
-            docker-compose logs --tail=20 qos-mcp-api
+            docker compose logs --tail=20 mcp-qos-api
 
             # Hiển thị container status
-            docker ps -a | grep qos-mcp-api
+            docker ps -a | grep mcp-qos-api
