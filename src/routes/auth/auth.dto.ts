@@ -3,16 +3,13 @@ import {
   LoginBodySchema,
   LoginResSchema,
   LogoutBodySchema,
-  RefreshTokenBodySchema,
-  RefreshTokenResSchema
+  SessionTokenBodySchema
 } from 'src/routes/auth/auth.model'
 
 export class LoginBodyDTO extends createZodDto(LoginBodySchema) {}
 
 export class LoginResDTO extends createZodDto(LoginResSchema) {}
 
-export class RefreshTokenBodyDTO extends createZodDto(RefreshTokenBodySchema) {}
-
-export class RefreshTokenResDTO extends createZodDto(RefreshTokenResSchema) {}
+export class SessionTokenBodyDTO extends createZodDto(SessionTokenBodySchema) {}
 
 export class LogoutBodyDTO extends createZodDto(LogoutBodySchema) {}

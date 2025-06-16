@@ -3,8 +3,6 @@ name: Build and Publish Docker Image
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
 
 jobs:
   build-and-publish:
@@ -24,14 +22,14 @@ jobs:
         run: echo "${{secrets.ENV_PRODUCTION}}" | base64 -d > .env
 
       - name: Build and tag Docker image
-        run: docker build -t ${{secrets.DOCKER_HUB_USERNAME}}/qos-mcp-api:latest .
+        run: docker build -t ${{secrets.DOCKER_HUB_USERNAME}}/mcp-qos-api:latest .
 
       - name: Push Docker image to Dockerhub
-        run: docker push ${{secrets.DOCKER_HUB_USERNAME}}/qos-mcp-api:latest
+        run: docker push ${{secrets.DOCKER_HUB_USERNAME}}/mcp-qos-api:latest
 
       - name: Update image metadata
         uses: docker/metadata-action@v3
         with:
-          images: ${{secrets.DOCKER_HUB_USERNAME}}/qos-mcp-api:latest
+          images: ${{secrets.DOCKER_HUB_USERNAME}}/mcp-qos-api:latest
           tags: |
             ${{github.sha}}

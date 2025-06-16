@@ -38,8 +38,8 @@ export const EmailNotFoundException = new UnprocessableEntityException([
 ])
 
 // Auth token related errors
-export const RefreshTokenAlreadyUsedException = new UnauthorizedException(
-  'Error.RefreshTokenAlreadyUsed'
+export const SessionTokenAlreadyUsedException = new UnauthorizedException(
+  'Error.SessionTokenAlreadyUsed'
 )
 export const UnauthorizedAccessException = new UnauthorizedException(
   'Error.UnauthorizedAccess'

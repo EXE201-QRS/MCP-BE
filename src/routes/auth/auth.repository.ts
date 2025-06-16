@@ -1,6 +1,6 @@
 import { WhereUniqueUserType } from '@/shared/repositories/shared-user.repo'
 import { Injectable } from '@nestjs/common'
-import { DeviceType, RefreshTokenType } from 'src/routes/auth/auth.model'
+import { DeviceType, SessionTokenType } from 'src/routes/auth/auth.model'
 import { UserType } from 'src/shared/models/shared-user.model'
 import { PrismaService } from 'src/shared/services/prisma.service'
 
@@ -19,8 +19,8 @@ export class AuthRepository {
 
   async findUniqueRefreshToken(where: {
     token: string
-  }): Promise<(RefreshTokenType & { user: UserType }) | null> {
-    return this.prismaService.refreshToken.findUnique({
+  }): Promise<(SessionTokenType & { user: UserType }) | null> {
+    return this.prismaService.sessionToken.findUnique({
       where,
       include: {
         user: true
@@ -39,13 +39,14 @@ export class AuthRepository {
     })
   }
 
-  createRefreshToken(data: {
+  createSessionToken(data: {
     token: string
     userId: number
+    name: string
     expiresAt: Date
     deviceId: number
   }) {
-    return this.prismaService.refreshToken.create({
+    return this.prismaService.sessionToken.create({
       data
     })
   }
@@ -68,8 +69,8 @@ export class AuthRepository {
     })
   }
 
-  deleteRefreshToken(where: { token: string }): Promise<RefreshTokenType> {
-    return this.prismaService.refreshToken.delete({
+  deleteSessionToken(where: { token: string }): Promise<SessionTokenType> {
+    return this.prismaService.sessionToken.delete({
       where
     })
   }

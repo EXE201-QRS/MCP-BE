@@ -1,0 +1,6 @@
+export const ServerStatus = {
+  UNINITIALIZED: 'UNINITIALIZED',
+  ACTIVE: 'ACTIVE',
+  SUSPENDED: 'SUSPENDED',
+  MAINTENANCE: 'MAINTENANCE'
+} as const

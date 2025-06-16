@@ -17,7 +17,7 @@ RUN npx prisma generate
 # Build the application
 RUN pnpm build
 
-EXPOSE 5000
+EXPOSE 6000
 
 # Use production node environment by default
 ENV NODE_ENV production
