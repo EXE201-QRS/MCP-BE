@@ -36,3 +36,8 @@ export const AUTH_MESSAGE = {
   LOGIN_SUCCESS: 'Login successful',
   LOGOUT_SUCCESS: 'Logout successful'
 }
+
+export const ROLE_TYPE = {
+  ADMIN_SYSTEM: 'ADMIN_SYSTEM',
+  CUSTOMER: 'CUSTOMER'
+} as const

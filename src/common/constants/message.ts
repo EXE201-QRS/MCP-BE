@@ -42,3 +42,17 @@ export const REVIEW_MESSAGE = {
   ID_IS_INVALID: 'ID đánh giá không hợp lệ',
   CUSTOMER_FORM_ID_IS_INVALID: 'ID form khách dịch vụ không hợp lệ'
 }
+
+export const CUSTOMER_MESSAGE = {
+  RESTAURANT_TYPE_IS_REQUIRED: 'Restaurant type is required',
+  RESTAURANT_NAME_IS_REQUIRED: 'Restaurant name is required',
+  ID_IS_INVALID: 'Customer ID is invalid',
+  PHONE_IS_INVALID: 'Customer phone number is invalid',
+  CREATE_SUCCESS: 'Customer created successfully',
+  UPDATED_SUCCESS: 'Customer updated successfully',
+  DELETED_SUCCESS: 'Customer deleted successfully',
+  GET_SUCCESS: 'Customer retrieved successfully',
+  NOT_FOUND: 'Customer not found',
+  ALREADY_EXISTS: 'Customer already exists',
+  INVALID_DATA: 'Invalid customer data provided'
+}

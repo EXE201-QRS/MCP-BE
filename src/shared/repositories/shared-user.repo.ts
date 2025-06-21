@@ -1,7 +1,10 @@
+import { CustomerType } from '@/routes/customer/customer.model'
 import { Injectable } from '@nestjs/common'
 import { UserType } from 'src/shared/models/shared-user.model'
 import { PrismaService } from 'src/shared/services/prisma.service'
-
+type UserIncludeCustomerType = UserType & {
+  customer: CustomerType | null
+}
 export type WhereUniqueUserType = { id: number } | { email: string }
 
 @Injectable()
@@ -24,6 +27,19 @@ export class SharedUserRepository {
         deletedAt: null
       },
       data
+    })
+  }
+  findUniqueIncludeCustomer(
+    where: WhereUniqueUserType
+  ): Promise<UserIncludeCustomerType | null> {
+    return this.prismaService.user.findFirst({
+      where: {
+        ...where,
+        deletedAt: null
+      },
+      include: {
+        customer: true
+      }
     })
   }
 }
