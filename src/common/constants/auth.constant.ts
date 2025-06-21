@@ -24,20 +24,20 @@ export const UserStatus = {
 
 export const TypeOfVerificationCode = {
   REGISTER: 'REGISTER',
-  FORGOT_PASSWORD: 'FORGOT_PASSWORD',
-  LOGIN: 'LOGIN',
-  DISABLE_2FA: 'DISABLE_2FA'
+  FORGOT_PASSWORD: 'FORGOT_PASSWORD'
 } as const
 
 export type TypeOfVerificationCodeType =
   (typeof TypeOfVerificationCode)[keyof typeof TypeOfVerificationCode]
 
-export const AUTH_MESSAGE = {
-  LOGIN_SUCCESS: 'Login successful',
-  LOGOUT_SUCCESS: 'Logout successful'
-}
-
-export const ROLE_TYPE = {
+export const Role = {
   ADMIN_SYSTEM: 'ADMIN_SYSTEM',
   CUSTOMER: 'CUSTOMER'
 } as const
+
+export type RoleType = (typeof Role)[keyof typeof Role]
+
+export const AUTH_MESSAGE = {
+  LOGIN_SUCCESS: 'Đăng nhập thành công',
+  REGISTER_SUCCESS: 'Đăng ký thành công'
+}

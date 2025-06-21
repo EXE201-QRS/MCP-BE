@@ -8,23 +8,14 @@ datasource db {
 }
 
 model User {
-  id            Int            @id @default(autoincrement())
-  email         String         @unique @db.VarChar(500)
-  name          String?        @db.VarChar(500)
-  password      String         @db.VarChar(500)
-  roleName      Role           @default(CUSTOMER)
-  phoneNumber   String?        @db.VarChar(50)
-  avatar        String?        @db.VarChar(1000)
-  Device        Device[]
-  sessionTokens SessionToken[]
+  id          Int     @id @default(autoincrement())
+  email       String  @unique @db.VarChar(500)
+  name        String? @db.VarChar(500)
+  password    String  @db.VarChar(500)
+  roleName    Role    @default(CUSTOMER)
+  phoneNumber String? @db.VarChar(50)
+  avatar      String? @db.VarChar(1000)
 
-  createdCustomers Customer[] @relation("CustomerCreatedBy")
-  updatedCustomers Customer[] @relation("CustomerUpdatedBy")
-  deletedCustomers Customer[] @relation("CustomerDeletedBy")
-
-  // 1 user có thể tạo ra nhiều user khác
-  // 1 user chỉ có thể được tạo ra bởi 1 user khác
-  // Tự quan hệ 1-n
   createdById  Int?
   createdBy    User?  @relation("CreatorUsers", fields: [createdById], references: [id], onDelete: SetNull, onUpdate: NoAction)
   createdUsers User[] @relation("CreatorUsers")
@@ -39,64 +30,6 @@ model User {
   deletedAt DateTime?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-  customer  Customer?
-
-  @@index([deletedAt])
-  @@index([email])
-}
-
-model SessionToken {
-  token     String   @unique @db.VarChar(1000)
-  userId    Int
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  name      String   @db.VarChar(100)
-  deviceId  Int // Foreign key tới Device
-  device    Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-
-  @@index([expiresAt])
-}
-
-model Device {
-  id            Int            @id @default(autoincrement())
-  userId        Int
-  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  userAgent     String
-  ip            String
-  lastActive    DateTime       @updatedAt // Thay updatedAt bằng lastActive cho ý nghĩa rõ hơn
-  createdAt     DateTime       @default(now())
-  isActive      Boolean        @default(true) // Trạng thái thiết bị (đang login hay đã logout)
-  sessionTokens SessionToken[]
-}
-
-model Customer {
-  id Int @id @default(autoincrement())
-
-  userId Int            @unique
-  user   User           @relation(fields: [userId], references: [id], onDelete: SetNull, onUpdate: NoAction)
-  status CustomerStatus @default(INACTIVE)
-
-  // Restaurant info
-  restaurantName    String? @db.VarChar(500)
-  restaurantAddress String? @db.VarChar(1000)
-  restaurantPhone   String? @db.VarChar(50)
-  restaurantType    String? @db.VarChar(200) // fast food, fine dining, etc.
-
-  // Session management - REMOVED (không lưu token)
-  // Flow: login -> JWT token (1h) -> client tự quản lý -> auto logout khi expired
-
-  // Audit fields
-  createdById Int?
-  createdBy   User? @relation("CustomerCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
-  updatedById Int?
-  updatedBy   User? @relation("CustomerUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
-  deletedById Int?
-  deletedBy   User? @relation("CustomerDeletedBy", fields: [deletedById], references: [id], onDelete: SetNull)
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
 
   @@index([deletedAt])
 }
@@ -129,5 +62,4 @@ enum CustomerStatus {
 enum VerificationCodeType {
   REGISTER
   FORGOT_PASSWORD
-  LOGIN
 }
