@@ -8,9 +8,7 @@ import {
   EmailNotFoundException,
   FailedToSendOTPException,
   InvalidOTPException,
-  OTPExpiredException,
-  SessionTokenAlreadyUsedException,
-  UnauthorizedAccessException
+  OTPExpiredException
 } from '@/routes/auth/auth.error'
 import {
   LoginBodyType,
@@ -19,11 +17,7 @@ import {
 } from '@/routes/auth/auth.model'
 import { AuthRepository } from '@/routes/auth/auth.repository'
 import { InvalidPasswordException } from '@/shared/error'
-import {
-  generateOTP,
-  isNotFoundPrismaError,
-  isUniqueConstraintPrismaError
-} from '@/shared/helpers'
+import { generateOTP, isUniqueConstraintPrismaError } from '@/shared/helpers'
 import { SharedUserRepository } from '@/shared/repositories/shared-user.repo'
 import { EmailService } from '@/shared/services/email.service'
 import { HashingService } from '@/shared/services/hashing.service'
@@ -33,7 +27,6 @@ import { Injectable } from '@nestjs/common'
 import { addMilliseconds } from 'date-fns'
 import ms from 'ms'
 import envConfig from 'src/config/env.config'
-import { CustomerRepo } from '../customer/customer.repo'
 @Injectable()
 export class AuthService {
   constructor(
@@ -41,11 +34,10 @@ export class AuthService {
     private readonly authRepository: AuthRepository,
     private readonly sharedUserRepository: SharedUserRepository,
     private readonly tokenService: TokenService,
-    private readonly emailService: EmailService,
-    private readonly cusRepository: CustomerRepo
+    private readonly emailService: EmailService
   ) {}
 
-  async login(body: LoginBodyType & { userAgent: string; ip: string }) {
+  async login(body: LoginBodyType) {
     // 1. Lấy thông tin user, kiểm tra user có tồn tại hay không, mật khẩu có đúng không
     const user = await this.authRepository.findUniqueUser({
       email: body.email
@@ -62,18 +54,10 @@ export class AuthService {
       throw InvalidPasswordException
     }
 
-    // 3. Tạo mới device
-    const device = await this.authRepository.createDevice({
-      userId: user.id,
-      userAgent: body.userAgent,
-      ip: body.ip
-    })
-
     // 4. Tạo mới session token
     const tokens = await this.generateTokens({
       userId: user.id,
-      deviceId: device.id,
-      name: user.name || '',
+      email: user.email || '',
       roleName: user.roleName
     })
     return {
@@ -82,23 +66,15 @@ export class AuthService {
     }
   }
 
-  async generateTokens({ userId, deviceId, name, roleName }: SessionTokenPayloadCreate) {
-    const sessionToken = await this.tokenService.signSessionToken({
+  generateTokens({ userId, email, roleName }: SessionTokenPayloadCreate): Promise<{
+    sessionToken: string
+  }> {
+    const token = this.tokenService.signSessionToken({
       userId,
-      deviceId,
-      name,
+      email,
       roleName
     })
-
-    const decodedSessionToken = await this.tokenService.verifySessionToken(sessionToken)
-    await this.authRepository.createSessionToken({
-      token: sessionToken,
-      userId,
-      name,
-      expiresAt: new Date(decodedSessionToken.exp * 1000),
-      deviceId
-    })
-    return { sessionToken }
+    return Promise.resolve({ sessionToken: token })
   }
 
   async register(body: RegisterBodyType) {
@@ -108,13 +84,12 @@ export class AuthService {
         code: body.code,
         type: TypeOfVerificationCode.REGISTER
       })
-      // const clientRoleId = await this.sharedRoleRepository.getClientRoleId()
       const hashedPassword = await this.hashingService.hash(body.password)
       const [user] = await Promise.all([
         this.authRepository.registerUser({
           email: body.email,
           password: hashedPassword,
-          roleName: body.roleName
+          roleName: 'CUSTOMER'
         }),
         this.authRepository.deleteVerificationCode({
           email_code_type: {
@@ -124,9 +99,15 @@ export class AuthService {
           }
         })
       ])
-      // tạo mới Customer
-      const newCus = await this.cusRepository.create({ data: { userId: user.id } })
-      return user
+      const tokens = await this.generateTokens({
+        userId: user.id,
+        email: user.email || '',
+        roleName: user.roleName
+      })
+      return {
+        data: tokens,
+        message: AUTH_MESSAGE.REGISTER_SUCCESS
+      }
     } catch (error) {
       if (isUniqueConstraintPrismaError(error)) {
         throw EmailAlreadyExistsException
@@ -164,29 +145,6 @@ export class AuthService {
     return { message: 'Gửi mã OTP thành công' }
   }
 
-  async logout(sessionToken: string) {
-    try {
-      // 1. Kiểm tra refreshToken có hợp lệ không
-      await this.tokenService.verifySessionToken(sessionToken)
-      // 2. Xóa refreshToken trong database
-      const deletedSessionToken = await this.authRepository.deleteSessionToken({
-        token: sessionToken
-      })
-      // 3. Cập nhật device là đã logout
-      await this.authRepository.updateDevice(deletedSessionToken.deviceId, {
-        isActive: false
-      })
-      return { message: AUTH_MESSAGE.LOGOUT_SUCCESS }
-    } catch (error) {
-      // Trường hợp đã refresh token rồi, hãy thông báo cho user biết
-      // refresh token của họ đã bị đánh cắp
-      if (isNotFoundPrismaError(error)) {
-        throw SessionTokenAlreadyUsedException
-      }
-      throw UnauthorizedAccessException
-    }
-  }
-
   async validateVerificationCode({
     email,
     code,
@@ -213,7 +171,7 @@ export class AuthService {
   }
 
   async getMe(userId: number) {
-    const user = await this.sharedUserRepository.findUniqueIncludeCustomer({
+    const user = await this.sharedUserRepository.findUnique({
       id: userId
     })
     if (!user) {

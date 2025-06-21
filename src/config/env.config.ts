@@ -21,16 +21,9 @@ const configSchema = z.object({
   APP_CORS_ORIGIN: z.string(),
   //Database
   DATABASE_URL: z.string(),
-  ACCESS_TOKEN_SECRET: z.string(),
-  ACCESS_TOKEN_EXPIRES_IN: z.string(),
-  REFRESH_TOKEN_SECRET: z.string(),
-  REFRESH_TOKEN_EXPIRES_IN: z.string(),
   SESSION_TOKEN_SECRET: z.string(),
   SESSION_TOKEN_EXPIRES_IN: z.string(),
-  ADMIN_NAME: z.string(),
   ADMIN_PASSWORD: z.string(),
-  ADMIN_EMAIL: z.string(),
-  ADMIN_PHONE: z.string(),
   SECRET_API_KEY: z.string(),
   OTP_EXPIRES_IN: z.string(),
   RESEND_API_KEY: z.string()

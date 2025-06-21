@@ -1,7 +1,6 @@
 export interface SessionTokenPayloadCreate {
   userId: number
-  deviceId: number
-  name: string
+  email: string
   roleName: string
 }
 

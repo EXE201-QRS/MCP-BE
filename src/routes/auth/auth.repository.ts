@@ -1,12 +1,7 @@
 import { TypeOfVerificationCodeType } from '@/common/constants/auth.constant'
 import { WhereUniqueUserType } from '@/shared/repositories/shared-user.repo'
 import { Injectable } from '@nestjs/common'
-import {
-  DeviceType,
-  RegisterResType,
-  SessionTokenType,
-  VerificationCodeType
-} from 'src/routes/auth/auth.model'
+import { VerificationCodeType } from 'src/routes/auth/auth.model'
 import { UserType } from 'src/shared/models/shared-user.model'
 import { PrismaService } from 'src/shared/services/prisma.service'
 
@@ -19,17 +14,6 @@ export class AuthRepository {
       where: {
         ...where,
         deletedAt: null
-      }
-    })
-  }
-
-  async findUniqueRefreshToken(where: {
-    token: string
-  }): Promise<(SessionTokenType & { user: UserType }) | null> {
-    return this.prismaService.sessionToken.findUnique({
-      where,
-      include: {
-        user: true
       }
     })
   }
@@ -47,48 +31,12 @@ export class AuthRepository {
 
   async registerUser(
     user: Pick<UserType, 'email' | 'roleName' | 'password'>
-  ): Promise<RegisterResType> {
+  ): Promise<Omit<UserType, 'password'>> {
     return this.prismaService.user.create({
       data: user,
       omit: {
         password: true
       }
-    })
-  }
-
-  createSessionToken(data: {
-    token: string
-    userId: number
-    name: string
-    expiresAt: Date
-    deviceId: number
-  }) {
-    return this.prismaService.sessionToken.create({
-      data
-    })
-  }
-
-  createDevice(
-    data: Pick<DeviceType, 'userId' | 'userAgent' | 'ip'> &
-      Partial<Pick<DeviceType, 'lastActive' | 'isActive'>>
-  ) {
-    return this.prismaService.device.create({
-      data
-    })
-  }
-
-  updateDevice(deviceId: number, data: Partial<DeviceType>): Promise<DeviceType> {
-    return this.prismaService.device.update({
-      where: {
-        id: deviceId
-      },
-      data
-    })
-  }
-
-  deleteSessionToken(where: { token: string }): Promise<SessionTokenType> {
-    return this.prismaService.sessionToken.delete({
-      where
     })
   }
 
