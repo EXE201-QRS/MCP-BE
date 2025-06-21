@@ -8,8 +8,15 @@ import { TokenService } from '@/shared/services/token.service'
 import { Global, Module } from '@nestjs/common'
 import { APP_GUARD } from '@nestjs/core'
 import { JwtModule } from '@nestjs/jwt'
+import { EmailService } from './services/email.service'
 
-const sharedServices = [PrismaService, HashingService, TokenService, SharedUserRepository]
+const sharedServices = [
+  PrismaService,
+  EmailService,
+  HashingService,
+  TokenService,
+  SharedUserRepository
+]
 @Global()
 @Module({
   imports: [JwtModule],

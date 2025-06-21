@@ -1,0 +1,6 @@
+export const CustomerStatus = {
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE',
+  SUSPENDED: 'SUSPENDED',
+  PENDING_VERIFICATION: 'PENDING_VERIFICATION'
+} as const
