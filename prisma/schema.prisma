@@ -9,26 +9,18 @@ datasource db {
 
 model User {
   id            Int            @id @default(autoincrement())
-  email         String
-  name          String         @db.VarChar(500)
+  email         String         @unique @db.VarChar(500)
+  name          String?        @db.VarChar(500)
   password      String         @db.VarChar(500)
-  phoneNumber   String         @db.VarChar(50)
+  roleName      Role           @default(CUSTOMER)
+  phoneNumber   String?        @db.VarChar(50)
   avatar        String?        @db.VarChar(1000)
   Device        Device[]
   sessionTokens SessionToken[]
 
-  createdServicePlans  ServicePlan[]  @relation("ServicePlanCreatedBy")
-  updatedServicePlans  ServicePlan[]  @relation("ServicePlanUpdatedBy")
-  deletedServicePlans  ServicePlan[]  @relation("ServicePlanDeletedBy")
-  createdCustomerForms CustomerForm[] @relation("CustomerFormCreatedBy")
-  updatedCustomerForms CustomerForm[] @relation("CustomerFormUpdatedBy")
-  deletedCustomerForms CustomerForm[] @relation("CustomerFormDeletedBy")
-  createdServers       Server[]       @relation("ServerCreatedBy")
-  updatedServers       Server[]       @relation("ServerUpdatedBy")
-  deletedServers       Server[]       @relation("ServerDeletedBy")
-  createdReviews       Review[]       @relation("ReviewCreatedBy")
-  updatedReviews       Review[]       @relation("ReviewUpdatedBy")
-  deletedReviews       Review[]       @relation("ReviewDeletedBy")
+  createdCustomers Customer[] @relation("CustomerCreatedBy")
+  updatedCustomers Customer[] @relation("CustomerUpdatedBy")
+  deletedCustomers Customer[] @relation("CustomerDeletedBy")
 
   // 1 user có thể tạo ra nhiều user khác
   // 1 user chỉ có thể được tạo ra bởi 1 user khác
@@ -47,8 +39,10 @@ model User {
   deletedAt DateTime?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+  customer  Customer?
 
   @@index([deletedAt])
+  @@index([email])
 }
 
 model SessionToken {
@@ -76,128 +70,64 @@ model Device {
   sessionTokens SessionToken[]
 }
 
-model ServicePlan {
-  id            Int            @id @default(autoincrement())
-  name          String         @unique @db.VarChar(100)
-  price         Float          @default(0.0)
-  description   String         @db.VarChar(500)
-  durationDays  PlanDuration   @default(ONE_MONTH)
-  customerForms CustomerForm[]
+model Customer {
+  id Int @id @default(autoincrement())
 
+  userId Int            @unique
+  user   User           @relation(fields: [userId], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  status CustomerStatus @default(INACTIVE)
+
+  // Restaurant info
+  restaurantName    String? @db.VarChar(500)
+  restaurantAddress String? @db.VarChar(1000)
+  restaurantPhone   String? @db.VarChar(50)
+  restaurantType    String? @db.VarChar(200) // fast food, fine dining, etc.
+
+  // Session management - REMOVED (không lưu token)
+  // Flow: login -> JWT token (1h) -> client tự quản lý -> auto logout khi expired
+
+  // Audit fields
   createdById Int?
-  createdBy   User? @relation("ServicePlanCreatedBy", fields: [createdById], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  createdBy   User? @relation("CustomerCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
   updatedById Int?
-  updatedBy   User? @relation("ServicePlanUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  updatedBy   User? @relation("CustomerUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
   deletedById Int?
-  deletedBy   User? @relation("ServicePlanDeletedBy", fields: [deletedById], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  deletedBy   User? @relation("CustomerDeletedBy", fields: [deletedById], references: [id], onDelete: SetNull)
 
-  deletedAt DateTime?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
   @@index([deletedAt])
 }
 
-model CustomerForm {
-  id            Int         @id @default(autoincrement())
-  name          String      @db.VarChar(100)
-  phone         String      @db.VarChar(50)
-  email         String      @db.VarChar(100)
-  address       String      @db.VarChar(500)
-  businessName  String      @db.VarChar(100)
-  note          String?     @db.VarChar(500)
-  status        FormStatus  @default(PENDING)
-  startDate     DateTime?
-  endDate       DateTime?
-  servicePlanId Int
-  servicePlan   ServicePlan @relation(fields: [servicePlanId], references: [id], onDelete: SetNull, onUpdate: NoAction)
-  servers       Server[]
-  reviews       Review[]
+model VerificationCode {
+  id    Int                  @id @default(autoincrement())
+  email String               @db.VarChar(500)
+  code  String               @db.VarChar(50)
+  type  VerificationCodeType
 
-  createdById Int?
-  createdBy   User? @relation("CustomerFormCreatedBy", fields: [createdById], references: [id], onDelete: SetNull, onUpdate: NoAction)
-  updatedById Int?
-  updatedBy   User? @relation("CustomerFormUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull, onUpdate: NoAction)
-  deletedById Int?
-  deletedBy   User? @relation("CustomerFormDeletedBy", fields: [deletedById], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
 
-  deletedAt DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-
-  @@index([deletedAt])
+  @@unique([email, code, type])
+  @@index([expiresAt])
 }
 
-model Server {
-  id              Int          @id @default(autoincrement())
-  customerFormsId Int          @unique
-  customerForm    CustomerForm @relation(fields: [customerFormsId], references: [id], onDelete: SetNull, onUpdate: NoAction)
-  frontEndUrl     String?      @default("") @db.VarChar(1000)
-  backEndUrl      String?      @default("") @db.VarChar(1000)
-  databaseUrl     String?      @default("") @db.VarChar(1000)
-  statusFrontEnd  ServerStatus @default(UNINITIALIZED)
-  statusBackEnd   ServerStatus @default(UNINITIALIZED)
-  statusDatabase  ServerStatus @default(UNINITIALIZED)
-
-  createdById Int?
-  createdBy   User? @relation("ServerCreatedBy", fields: [createdById], references: [id], onDelete: SetNull, onUpdate: NoAction)
-  updatedById Int?
-  updatedBy   User? @relation("ServerUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull, onUpdate: NoAction)
-  deletedById Int?
-  deletedBy   User? @relation("ServerDeletedBy", fields: [deletedById], references: [id], onDelete: SetNull, onUpdate: NoAction)
-
-  deletedAt DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-
-  @@index([deletedAt])
+enum Role {
+  ADMIN_SYSTEM
+  CUSTOMER
 }
 
-model Review {
-  id              Int          @id @default(autoincrement())
-  customerFormsId Int
-  customerForm    CustomerForm @relation(fields: [customerFormsId], references: [id], onDelete: SetNull, onUpdate: NoAction)
-  comment         String       @db.VarChar(500)
-  type            ReviewType   @default(SERVICE)
-  rating          Int          @default(0)
-
-  createdById Int?
-  createdBy   User? @relation("ReviewCreatedBy", fields: [createdById], references: [id], onDelete: SetNull, onUpdate: NoAction)
-  updatedById Int?
-  updatedBy   User? @relation("ReviewUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull, onUpdate: NoAction)
-  deletedById Int?
-  deletedBy   User? @relation("ReviewDeletedBy", fields: [deletedById], references: [id], onDelete: SetNull, onUpdate: NoAction)
-
-  deletedAt DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-
-  @@index([deletedAt])
-}
-
-enum ReviewType {
-  SERVICE
-  SERVER
-}
-
-enum ServerStatus {
-  UNINITIALIZED
+enum CustomerStatus {
   ACTIVE
+  INACTIVE
   SUSPENDED
-  MAINTENANCE
+  PENDING_VERIFICATION
 }
 
-enum FormStatus {
-  PENDING
-  PROCESSING
-  PAID
-  COMPLETED
-  REJECTED
-}
-
-enum PlanDuration {
-  ONE_MONTH
-  THREE_MONTHS
-  SIX_MONTHS
-  ONE_YEAR
+enum VerificationCodeType {
+  REGISTER
+  FORGOT_PASSWORD
+  LOGIN
 }
