@@ -8,13 +8,16 @@ datasource db {
 }
 
 model User {
-  id          Int     @id @default(autoincrement())
-  email       String  @unique @db.VarChar(500)
-  name        String? @db.VarChar(500)
-  password    String  @db.VarChar(500)
-  roleName    Role    @default(CUSTOMER)
-  phoneNumber String? @db.VarChar(50)
-  avatar      String? @db.VarChar(1000)
+  id            Int            @id @default(autoincrement())
+  email         String         @unique @db.VarChar(500)
+  name          String?        @db.VarChar(500)
+  password      String         @db.VarChar(500)
+  roleName      Role           @default(CUSTOMER)
+  phoneNumber   String?        @db.VarChar(50)
+  avatar        String?        @db.VarChar(1000)
+  subscriptions Subscription[]
+  reviews       Review[]
+  payments      Payment[]
 
   createdServicePlans  ServicePlan[]  @relation("ServicePlanCreatedBy")
   updatedServicePlans  ServicePlan[]  @relation("ServicePlanUpdatedBy")
@@ -26,9 +29,10 @@ model User {
   updatedReviews       Review[]       @relation("ReviewUpdatedBy")
   deletedReviews       Review[]       @relation("ReviewDeletedBy")
   responseReviews      Review[]       @relation("ReviewRespondedBy")
-
-  subscriptions Subscription[]
-  reviews       Review[]
+  processedPayments    Payment[]      @relation("PaymentProcessedBy")
+  createdBlog          Blog[]         @relation("BlogCreatedBy")
+  updatedBlog          Blog[]         @relation("BlogUpdatedBy")
+  deletedBlog          Blog[]         @relation("BlogDeletedBy")
 
   createdById  Int?
   createdBy    User?  @relation("CreatorUsers", fields: [createdById], references: [id], onDelete: SetNull, onUpdate: NoAction)
@@ -101,7 +105,8 @@ model Subscription {
   endDate   DateTime?
   status    SubscriptionStatus @default(PENDING) // Trạng thái: PENDING, PAID, ACTIVE, EXPIRED, CANCELLED
 
-  reviews Review[]
+  reviews  Review[]
+  payments Payment[]
 
   // Audit fields
   createdById Int?
@@ -118,6 +123,52 @@ model Subscription {
   @@index([userId])
   @@index([status])
   @@index([endDate])
+  @@index([deletedAt])
+}
+
+model Payment {
+  id     Int  @id @default(autoincrement())
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  subscriptionId Int
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: NoAction)
+
+  paymentMethod PaymentMethod
+  amount        Float         @default(0.0) // Số tiền thanh toán
+  status        PaymentStatus @default(PENDING)
+
+  // PayOS specific fields
+  payosOrderId       String? @unique @db.VarChar(500) // PayOS order ID
+  payosPaymentLinkId String? @db.VarChar(500) // PayOS payment link ID
+  payosTransactionId String? @db.VarChar(500) // PayOS transaction ID
+  payosQrCode        String? @db.Text // PayOS QR code
+  payosCheckoutUrl   String? @db.VarChar(1000) // PayOS checkout URL
+
+  // Cash payment fields
+  receivedAmount Float? // Số tiền nhận được (cash)
+  changeAmount   Float? // Số tiền thối lại (cash)
+
+  // Payment gateway response
+  gatewayResponse Json? // Raw response từ PayOS
+  failureReason   String? @db.VarChar(1000) // Lý do thất bại
+
+  // Timestamps
+  paidAt    DateTime? // Thời gian thanh toán thành công
+  expiredAt DateTime? // Thời gian hết hạn (PayOS)
+
+  // Audit fields
+  processedById Int?
+  processedBy   User? @relation("PaymentProcessedBy", fields: [processedById], references: [id], onDelete: SetNull, onUpdate: NoAction)
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([subscriptionId])
+  @@index([status])
+  @@index([paymentMethod])
+  @@index([payosOrderId])
   @@index([deletedAt])
 }
 
@@ -157,6 +208,59 @@ model Review {
   @@index([deletedAt])
 }
 
+model Blog {
+  id      Int     @id @default(autoincrement())
+  title   String  @db.VarChar(500)
+  slug    String  @unique @db.VarChar(500)
+  content String  @db.Text
+  excerpt String? @db.VarChar(1000)
+
+  // SEO
+  metaTitle       String? @db.VarChar(500)
+  metaDescription String? @db.VarChar(1000)
+  keywords        String? @db.VarChar(500)
+
+  // Media - SỬ DỤNG MEDIA SYSTEM CÓ SẴN
+  featuredImage String?  @db.VarChar(1000) // S3 URL từ media upload
+  images        String[] // Additional S3 URLs
+
+  // Publishing
+  status      BlogStatus @default(DRAFT)
+  publishedAt DateTime?
+
+  // Categories
+  category String?  @db.VarChar(200)
+  tags     String[] // Array of tags
+
+  // Engagement
+  views Int @default(0)
+  likes Int @default(0)
+
+  // Audit fields - TƯƠNG TỰ CÁC MODEL KHÁC
+  createdById Int?
+  createdBy   User? @relation("BlogCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedById Int?
+  updatedBy   User? @relation("BlogUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  deletedById Int?
+  deletedBy   User? @relation("BlogDeletedBy", fields: [deletedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([slug])
+  @@index([status])
+  @@index([publishedAt])
+  @@index([category])
+  @@index([deletedAt])
+}
+
+enum BlogStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
 enum Role {
   ADMIN_SYSTEM
   CUSTOMER
@@ -190,4 +294,18 @@ enum ReviewStatus {
 enum ReviewFor {
   SERVICE
   PLATFORM
+}
+
+enum PaymentMethod {
+  BANK_TRANSFER // Chuyển khoản ngân hàng (PayOS)
+}
+
+enum PaymentStatus {
+  PENDING // Đang chờ thanh toán
+  PROCESSING // Đang xử lý
+  PAID // Đã thanh toán thành công
+  FAILED // Thanh toán thất bại
+  CANCELLED // Đã hủy
+  EXPIRED // Đã hết hạn
+  REFUNDED // Đã hoàn tiền
 }
