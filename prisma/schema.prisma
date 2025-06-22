@@ -26,9 +26,11 @@ model User {
   updatedReviews       Review[]       @relation("ReviewUpdatedBy")
   deletedReviews       Review[]       @relation("ReviewDeletedBy")
   responseReviews      Review[]       @relation("ReviewRespondedBy")
+  processedPayments    Payment[]      @relation("PaymentProcessedBy")
 
   subscriptions Subscription[]
   reviews       Review[]
+  payments      Payment[]
 
   createdById  Int?
   createdBy    User?  @relation("CreatorUsers", fields: [createdById], references: [id], onDelete: SetNull, onUpdate: NoAction)
@@ -101,7 +103,8 @@ model Subscription {
   endDate   DateTime?
   status    SubscriptionStatus @default(PENDING) // Trạng thái: PENDING, PAID, ACTIVE, EXPIRED, CANCELLED
 
-  reviews Review[]
+  reviews  Review[]
+  payments Payment[]
 
   // Audit fields
   createdById Int?
@@ -118,6 +121,52 @@ model Subscription {
   @@index([userId])
   @@index([status])
   @@index([endDate])
+  @@index([deletedAt])
+}
+
+model Payment {
+  id     Int  @id @default(autoincrement())
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  subscriptionId Int
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: NoAction)
+
+  paymentMethod PaymentMethod
+  amount        Float         @default(0.0) // Số tiền thanh toán
+  status        PaymentStatus @default(PENDING)
+
+  // PayOS specific fields
+  payosOrderId       String? @unique @db.VarChar(500) // PayOS order ID
+  payosPaymentLinkId String? @db.VarChar(500) // PayOS payment link ID
+  payosTransactionId String? @db.VarChar(500) // PayOS transaction ID
+  payosQrCode        String? @db.Text // PayOS QR code
+  payosCheckoutUrl   String? @db.VarChar(1000) // PayOS checkout URL
+
+  // Cash payment fields
+  receivedAmount Float? // Số tiền nhận được (cash)
+  changeAmount   Float? // Số tiền thối lại (cash)
+
+  // Payment gateway response
+  gatewayResponse Json? // Raw response từ PayOS
+  failureReason   String? @db.VarChar(1000) // Lý do thất bại
+
+  // Timestamps
+  paidAt    DateTime? // Thời gian thanh toán thành công
+  expiredAt DateTime? // Thời gian hết hạn (PayOS)
+
+  // Audit fields
+  processedById Int?
+  processedBy   User? @relation("PaymentProcessedBy", fields: [processedById], references: [id], onDelete: SetNull, onUpdate: NoAction)
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([subscriptionId])
+  @@index([status])
+  @@index([paymentMethod])
+  @@index([payosOrderId])
   @@index([deletedAt])
 }
 
@@ -177,8 +226,6 @@ enum SubscriptionStatus {
 
 enum DurationDays {
   ONE_MONTH
-  THREE_MONTHS
-  SIX_MONTHS
 }
 
 enum ReviewStatus {
@@ -190,4 +237,18 @@ enum ReviewStatus {
 enum ReviewFor {
   SERVICE
   PLATFORM
+}
+
+enum PaymentMethod {
+  BANK_TRANSFER // Chuyển khoản ngân hàng (PayOS)
+}
+
+enum PaymentStatus {
+  PENDING // Đang chờ thanh toán
+  PROCESSING // Đang xử lý
+  PAID // Đã thanh toán thành công
+  FAILED // Thanh toán thất bại
+  CANCELLED // Đã hủy
+  EXPIRED // Đã hết hạn
+  REFUNDED // Đã hoàn tiền
 }
