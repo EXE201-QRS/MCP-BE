@@ -26,7 +26,12 @@ const configSchema = z.object({
   ADMIN_PASSWORD: z.string(),
   SECRET_API_KEY: z.string(),
   OTP_EXPIRES_IN: z.string(),
-  RESEND_API_KEY: z.string()
+  RESEND_API_KEY: z.string(),
+  //AWS S3
+  S3_REGION: z.string(),
+  S3_ACCESS_KEY: z.string(),
+  S3_SECRET_KEY: z.string(),
+  S3_BUCKET_NAME: z.string()
   // GOOGLE_CLIENT_ID: z.string(),
   // GOOGLE_CLIENT_SECRET: z.string(),
   // GOOGLE_REDIRECT_URI: z.string(),

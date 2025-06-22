@@ -16,6 +16,20 @@ model User {
   phoneNumber String? @db.VarChar(50)
   avatar      String? @db.VarChar(1000)
 
+  createdServicePlans  ServicePlan[]  @relation("ServicePlanCreatedBy")
+  updatedServicePlans  ServicePlan[]  @relation("ServicePlanUpdatedBy")
+  deletedServicePlans  ServicePlan[]  @relation("ServicePlanDeletedBy")
+  createdSubscriptions Subscription[] @relation("SubscriptionCreatedBy")
+  updatedSubscriptions Subscription[] @relation("SubscriptionUpdatedBy")
+  deletedSubscriptions Subscription[] @relation("SubscriptionDeletedBy")
+  createdReviews       Review[]       @relation("ReviewCreatedBy")
+  updatedReviews       Review[]       @relation("ReviewUpdatedBy")
+  deletedReviews       Review[]       @relation("ReviewDeletedBy")
+  responseReviews      Review[]       @relation("ReviewRespondedBy")
+
+  subscriptions Subscription[]
+  reviews       Review[]
+
   createdById  Int?
   createdBy    User?  @relation("CreatorUsers", fields: [createdById], references: [id], onDelete: SetNull, onUpdate: NoAction)
   createdUsers User[] @relation("CreatorUsers")
@@ -47,19 +61,133 @@ model VerificationCode {
   @@index([expiresAt])
 }
 
+model ServicePlan {
+  id          Int     @id @default(autoincrement())
+  name        String  @unique // Basic, Professional, Enterprise
+  description String? // Mô tả ngắn: "Phù hợp cho nhà hàng nhỏ", etc.
+  price       Float   @default(0.0) // VND/tháng
+
+  subscriptions Subscription[]
+
+  createdById Int?
+  createdBy   User? @relation("ServicePlanCreatedBy", fields: [createdById], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  updatedById Int?
+  updatedBy   User? @relation("ServicePlanUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  deletedById Int?
+  deletedBy   User? @relation("ServicePlanDeletedBy", fields: [deletedById], references: [id], onDelete: SetNull, onUpdate: NoAction)
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([deletedAt])
+}
+
+model Subscription {
+  id                Int     @id @default(autoincrement())
+  userId            Int
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  restaurantName    String  @db.VarChar(500)
+  restaurantAddress String  @db.VarChar(1000)
+  restaurantPhone   String  @db.VarChar(15)
+  restaurantType    String  @db.VarChar(200) // fast food, fine dining, etc.
+  description       String? @db.VarChar(1000) // Mô tả ngắn về nhà hàng
+
+  servicePlanId Int
+  servicePlan   ServicePlan  @relation(fields: [servicePlanId], references: [id], onDelete: Cascade)
+  durationDays  DurationDays @default(ONE_MONTH) // Số ngày của gói dịch vụ, ví dụ: 30, 90, 365
+
+  startDate DateTime?
+  endDate   DateTime?
+  status    SubscriptionStatus @default(PENDING) // Trạng thái: PENDING, PAID, ACTIVE, EXPIRED, CANCELLED
+
+  reviews Review[]
+
+  // Audit fields
+  createdById Int?
+  createdBy   User? @relation("SubscriptionCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedById Int?
+  updatedBy   User? @relation("SubscriptionUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  deletedById Int?
+  deletedBy   User? @relation("SubscriptionDeletedBy", fields: [deletedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([userId])
+  @@index([status])
+  @@index([endDate])
+  @@index([deletedAt])
+}
+
+model Review {
+  id     Int  @id @default(autoincrement())
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  subscriptionId Int
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  rating    Int          @default(5) // 1-5 stars
+  content   String       @db.VarChar(1000)
+  status    ReviewStatus @default(PENDING) // PENDING, APPROVED, REJECTED
+  isPublic  Boolean      @default(false)
+  reviewFor ReviewFor    @default(SERVICE) // SERVICE, PLATFORM
+
+  // Admin response
+  adminResponse String? @db.VarChar(1000)
+
+  responsedAt   DateTime?
+  responsedById Int?
+  responsedBy   User?     @relation("ReviewRespondedBy", fields: [responsedById], references: [id], onDelete: SetNull)
+
+  // Audit fields
+  createdById Int?
+  createdBy   User? @relation("ReviewCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedById Int?
+  updatedBy   User? @relation("ReviewUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  deletedById Int?
+  deletedBy   User? @relation("ReviewDeletedBy", fields: [deletedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([deletedAt])
+}
+
 enum Role {
   ADMIN_SYSTEM
   CUSTOMER
 }
 
-enum CustomerStatus {
-  ACTIVE
-  INACTIVE
-  SUSPENDED
-  PENDING_VERIFICATION
-}
-
 enum VerificationCodeType {
   REGISTER
   FORGOT_PASSWORD
+}
+
+enum SubscriptionStatus {
+  PENDING
+  PAID
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+enum DurationDays {
+  ONE_MONTH
+  THREE_MONTHS
+  SIX_MONTHS
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum ReviewFor {
+  SERVICE
+  PLATFORM
 }
