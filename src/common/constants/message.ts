@@ -56,3 +56,22 @@ export const CUSTOMER_MESSAGE = {
   ALREADY_EXISTS: 'Customer already exists',
   INVALID_DATA: 'Invalid customer data provided'
 }
+
+export const SUBSCRIPTION_MESSAGE = {
+  RESTAURANT_NAME_IS_REQUIRED: 'Tên nhà hàng là bắt buộc',
+  RESTAURANT_ADDRESS_IS_REQUIRED: 'Địa chỉ nhà hàng là bắt buộc',
+  RESTAURANT_PHONE_IS_REQUIRED: 'Số điện thoại nhà hàng là bắt buộc',
+  RESTAURANT_TYPE_IS_REQUIRED: 'Loại nhà hàng là bắt buộc',
+  SERVICE_PLAN_ID_IS_INVALID: 'ID gói dịch vụ không hợp lệ',
+
+  USER_ID_IS_INVALID: 'ID người dùng không hợp lệ',
+  CREATED_SUCCESSFUL: 'Tạo đăng ký thành công',
+  UPDATED_SUCCESSFUL: 'Cập nhật đăng ký thành công',
+  DELETED_SUCCESSFUL: 'Xóa đăng ký thành công',
+  GET_ALL_SUCCESSFUL: 'Lấy danh sách đăng ký thành công',
+  GET_DETAIL_SUCCESSFUL: 'Lấy chi tiết đăng ký thành công',
+  ID_IS_INVALID: 'ID đăng ký không hợp lệ',
+  NAME_IS_REQUIRED: 'Tên đăng ký là bắt buộc',
+  PRICE_IS_INVALID: 'Giá đăng ký không hợp lệ',
+  DURATION_IS_INVALID: 'Thời gian sử dụng đăng ký không hợp lệ'
+} as const
