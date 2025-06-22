@@ -9,13 +9,15 @@ import { Global, Module } from '@nestjs/common'
 import { APP_GUARD } from '@nestjs/core'
 import { JwtModule } from '@nestjs/jwt'
 import { EmailService } from './services/email.service'
+import { S3Service } from './services/S3.service'
 
 const sharedServices = [
   PrismaService,
   EmailService,
   HashingService,
   TokenService,
-  SharedUserRepository
+  SharedUserRepository,
+  S3Service
 ]
 @Global()
 @Module({
