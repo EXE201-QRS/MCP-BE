@@ -8,13 +8,16 @@ datasource db {
 }
 
 model User {
-  id          Int     @id @default(autoincrement())
-  email       String  @unique @db.VarChar(500)
-  name        String? @db.VarChar(500)
-  password    String  @db.VarChar(500)
-  roleName    Role    @default(CUSTOMER)
-  phoneNumber String? @db.VarChar(50)
-  avatar      String? @db.VarChar(1000)
+  id            Int            @id @default(autoincrement())
+  email         String         @unique @db.VarChar(500)
+  name          String?        @db.VarChar(500)
+  password      String         @db.VarChar(500)
+  roleName      Role           @default(CUSTOMER)
+  phoneNumber   String?        @db.VarChar(50)
+  avatar        String?        @db.VarChar(1000)
+  subscriptions Subscription[]
+  reviews       Review[]
+  payments      Payment[]
 
   createdServicePlans  ServicePlan[]  @relation("ServicePlanCreatedBy")
   updatedServicePlans  ServicePlan[]  @relation("ServicePlanUpdatedBy")
@@ -27,10 +30,9 @@ model User {
   deletedReviews       Review[]       @relation("ReviewDeletedBy")
   responseReviews      Review[]       @relation("ReviewRespondedBy")
   processedPayments    Payment[]      @relation("PaymentProcessedBy")
-
-  subscriptions Subscription[]
-  reviews       Review[]
-  payments      Payment[]
+  createdBlog          Blog[]         @relation("BlogCreatedBy")
+  updatedBlog          Blog[]         @relation("BlogUpdatedBy")
+  deletedBlog          Blog[]         @relation("BlogDeletedBy")
 
   createdById  Int?
   createdBy    User?  @relation("CreatorUsers", fields: [createdById], references: [id], onDelete: SetNull, onUpdate: NoAction)
@@ -206,6 +208,59 @@ model Review {
   @@index([deletedAt])
 }
 
+model Blog {
+  id      Int     @id @default(autoincrement())
+  title   String  @db.VarChar(500)
+  slug    String  @unique @db.VarChar(500)
+  content String  @db.Text
+  excerpt String? @db.VarChar(1000)
+
+  // SEO
+  metaTitle       String? @db.VarChar(500)
+  metaDescription String? @db.VarChar(1000)
+  keywords        String? @db.VarChar(500)
+
+  // Media - SỬ DỤNG MEDIA SYSTEM CÓ SẴN
+  featuredImage String?  @db.VarChar(1000) // S3 URL từ media upload
+  images        String[] // Additional S3 URLs
+
+  // Publishing
+  status      BlogStatus @default(DRAFT)
+  publishedAt DateTime?
+
+  // Categories
+  category String?  @db.VarChar(200)
+  tags     String[] // Array of tags
+
+  // Engagement
+  views Int @default(0)
+  likes Int @default(0)
+
+  // Audit fields - TƯƠNG TỰ CÁC MODEL KHÁC
+  createdById Int?
+  createdBy   User? @relation("BlogCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedById Int?
+  updatedBy   User? @relation("BlogUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  deletedById Int?
+  deletedBy   User? @relation("BlogDeletedBy", fields: [deletedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([slug])
+  @@index([status])
+  @@index([publishedAt])
+  @@index([category])
+  @@index([deletedAt])
+}
+
+enum BlogStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
 enum Role {
   ADMIN_SYSTEM
   CUSTOMER
@@ -226,6 +281,8 @@ enum SubscriptionStatus {
 
 enum DurationDays {
   ONE_MONTH
+  THREE_MONTHS
+  SIX_MONTHS
 }
 
 enum ReviewStatus {
