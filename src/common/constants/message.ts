@@ -33,16 +33,6 @@ export const SERVER_MESSAGE = {
   CUSTOMER_FORM_ID_IS_INVALID: 'ID form khách dịch vụ không hợp lệ'
 } as const
 
-export const REVIEW_MESSAGE = {
-  CREATED_SUCCESSFUL: 'Tạo đánh giá thành công',
-  UPDATED_SUCCESSFUL: 'Cập nhật đánh giá thành công',
-  DELETED_SUCCESSFUL: 'Xóa đánh giá thành công',
-  GET_ALL_SUCCESSFUL: 'Lấy danh sách đánh giá thành công',
-  GET_DETAIL_SUCCESSFUL: 'Lấy chi tiết đánh giá thành công',
-  ID_IS_INVALID: 'ID đánh giá không hợp lệ',
-  CUSTOMER_FORM_ID_IS_INVALID: 'ID form khách dịch vụ không hợp lệ'
-}
-
 export const CUSTOMER_MESSAGE = {
   RESTAURANT_TYPE_IS_REQUIRED: 'Restaurant type is required',
   RESTAURANT_NAME_IS_REQUIRED: 'Restaurant name is required',
@@ -75,3 +65,18 @@ export const SUBSCRIPTION_MESSAGE = {
   PRICE_IS_INVALID: 'Giá đăng ký không hợp lệ',
   DURATION_IS_INVALID: 'Thời gian sử dụng đăng ký không hợp lệ'
 } as const
+
+export const REVIEW_MESSAGE = {
+  CONTENT_IS_REQUIRED: 'Nội dung đánh giá là bắt buộc',
+  SUBSCRIPTION_ID_IS_INVALID: 'ID đăng ký không hợp lệ',
+  CREATED_SUCCESSFUL: 'Tạo đánh giá thành công',
+  UPDATED_SUCCESSFUL: 'Cập nhật đánh giá thành công',
+  DELETED_SUCCESSFUL: 'Xóa đánh giá thành công',
+  GET_ALL_SUCCESSFUL: 'Lấy danh sách đánh giá thành công',
+  GET_DETAIL_SUCCESSFUL: 'Lấy chi tiết đánh giá thành công',
+  ID_IS_INVALID: 'ID đánh giá không hợp lệ',
+  USER_ID_IS_INVALID: 'ID người dùng không hợp lệ',
+
+  RATING_IS_INVALID: 'Đánh giá không hợp lệ',
+  COMMENT_IS_REQUIRED: 'Bình luận là bắt buộc'
+}

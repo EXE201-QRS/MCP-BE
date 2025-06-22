@@ -22,8 +22,13 @@ model User {
   createdSubscriptions Subscription[] @relation("SubscriptionCreatedBy")
   updatedSubscriptions Subscription[] @relation("SubscriptionUpdatedBy")
   deletedSubscriptions Subscription[] @relation("SubscriptionDeletedBy")
+  createdReviews       Review[]       @relation("ReviewCreatedBy")
+  updatedReviews       Review[]       @relation("ReviewUpdatedBy")
+  deletedReviews       Review[]       @relation("ReviewDeletedBy")
+  responseReviews      Review[]       @relation("ReviewRespondedBy")
 
   subscriptions Subscription[]
+  reviews       Review[]
 
   createdById  Int?
   createdBy    User?  @relation("CreatorUsers", fields: [createdById], references: [id], onDelete: SetNull, onUpdate: NoAction)
@@ -96,6 +101,8 @@ model Subscription {
   endDate   DateTime?
   status    SubscriptionStatus @default(PENDING) // Trạng thái: PENDING, PAID, ACTIVE, EXPIRED, CANCELLED
 
+  reviews Review[]
+
   // Audit fields
   createdById Int?
   createdBy   User? @relation("SubscriptionCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
@@ -111,6 +118,42 @@ model Subscription {
   @@index([userId])
   @@index([status])
   @@index([endDate])
+  @@index([deletedAt])
+}
+
+model Review {
+  id     Int  @id @default(autoincrement())
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  subscriptionId Int
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  rating    Int          @default(5) // 1-5 stars
+  content   String       @db.VarChar(1000)
+  status    ReviewStatus @default(PENDING) // PENDING, APPROVED, REJECTED
+  isPublic  Boolean      @default(false)
+  reviewFor ReviewFor    @default(SERVICE) // SERVICE, PLATFORM
+
+  // Admin response
+  adminResponse String? @db.VarChar(1000)
+
+  responsedAt   DateTime?
+  responsedById Int?
+  responsedBy   User?     @relation("ReviewRespondedBy", fields: [responsedById], references: [id], onDelete: SetNull)
+
+  // Audit fields
+  createdById Int?
+  createdBy   User? @relation("ReviewCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedById Int?
+  updatedBy   User? @relation("ReviewUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  deletedById Int?
+  deletedBy   User? @relation("ReviewDeletedBy", fields: [deletedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
   @@index([deletedAt])
 }
 
@@ -136,4 +179,15 @@ enum DurationDays {
   ONE_MONTH
   THREE_MONTHS
   SIX_MONTHS
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum ReviewFor {
+  SERVICE
+  PLATFORM
 }

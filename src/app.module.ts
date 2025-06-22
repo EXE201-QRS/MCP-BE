@@ -7,12 +7,21 @@ import { Module } from '@nestjs/common'
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core'
 import { ZodSerializerInterceptor } from 'nestjs-zod'
 import { AuthModule } from './routes/auth/auth.module'
+import { MediaModule } from './routes/media/media.module'
+import { ReviewModule } from './routes/review/review.module'
 import { ServicePlanModule } from './routes/service-plan/service-plan.module'
 import { SubscriptionModule } from './routes/subscription/subscription.module'
 import { SharedModule } from './shared/shared.module'
 
 @Module({
-  imports: [SharedModule, AuthModule, ServicePlanModule, SubscriptionModule],
+  imports: [
+    SharedModule,
+    AuthModule,
+    ServicePlanModule,
+    SubscriptionModule,
+    ReviewModule,
+    MediaModule
+  ],
   controllers: [],
   providers: [
     AccessTokenGuard,
