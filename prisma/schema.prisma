@@ -16,6 +16,10 @@ model User {
   phoneNumber String? @db.VarChar(50)
   avatar      String? @db.VarChar(1000)
 
+  createdServicePlans ServicePlan[] @relation("ServicePlanCreatedBy")
+  updatedServicePlans ServicePlan[] @relation("ServicePlanUpdatedBy")
+  deletedServicePlans ServicePlan[] @relation("ServicePlanDeletedBy")
+
   createdById  Int?
   createdBy    User?  @relation("CreatorUsers", fields: [createdById], references: [id], onDelete: SetNull, onUpdate: NoAction)
   createdUsers User[] @relation("CreatorUsers")
@@ -47,6 +51,27 @@ model VerificationCode {
   @@index([expiresAt])
 }
 
+model ServicePlan {
+  id          Int     @id @default(autoincrement())
+  name        String  @unique // Basic, Professional, Enterprise
+  description String? // Mô tả ngắn: "Phù hợp cho nhà hàng nhỏ", etc.
+  price       Float   @default(0.0) // VND/tháng
+
+  createdById Int?
+  createdBy   User? @relation("ServicePlanCreatedBy", fields: [createdById], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  updatedById Int?
+  updatedBy   User? @relation("ServicePlanUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  deletedById Int?
+  deletedBy   User? @relation("ServicePlanDeletedBy", fields: [deletedById], references: [id], onDelete: SetNull, onUpdate: NoAction)
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([name])
+  @@index([deletedAt])
+}
+
 enum Role {
   ADMIN_SYSTEM
   CUSTOMER
@@ -62,4 +87,11 @@ enum CustomerStatus {
 enum VerificationCodeType {
   REGISTER
   FORGOT_PASSWORD
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+  SUSPENDED
 }
