@@ -80,3 +80,41 @@ export const REVIEW_MESSAGE = {
   RATING_IS_INVALID: 'Đánh giá không hợp lệ',
   COMMENT_IS_REQUIRED: 'Bình luận là bắt buộc'
 }
+
+export const PAYMENT_MESSAGE = {
+  INVALID_INFORMATION: 'Thông tin thanh toán không hợp lệ',
+  SERVICE_PLAN_NOT_FOUND: 'Gói dịch vụ không tồn tại',
+  SUBSCRIPTION_NOT_FOUND: 'Đăng ký không tồn tại',
+  SUBSCRIPTION_ID_IS_INVALID: 'ID đăng ký không hợp lệ',
+  CREATED_SUCCESSFUL: 'Tạo thanh toán thành công',
+  UPDATED_SUCCESSFUL: 'Cập nhật thanh toán thành công',
+  DELETED_SUCCESSFUL: 'Xóa thanh toán thành công',
+  GET_ALL_SUCCESSFUL: 'Lấy danh sách thanh toán thành công',
+  GET_DETAIL_SUCCESSFUL: 'Lấy chi tiết thanh toán thành công',
+  ID_IS_INVALID: 'ID thanh toán không hợp lệ',
+  USER_ID_IS_INVALID: 'ID người dùng không hợp lệ',
+  PAYMENT_METHOD_IS_REQUIRED: 'Phương thức thanh toán là bắt buộc',
+  AMOUNT_IS_INVALID: 'Số tiền thanh toán không hợp lệ',
+  STATUS_IS_INVALID: 'Trạng thái thanh toán không hợp lệ',
+  PAYOS_ORDER_ID_IS_INVALID: 'ID đơn hàng PayOS không hợp lệ',
+  PAYOS_PAYMENT_LINK_ID_IS_INVALID: 'ID liên kết thanh toán PayOS không hợp lệ',
+  PAYOS_TRANSACTION_ID_IS_INVALID: 'ID giao dịch PayOS không hợp lệ',
+  PAYOS_QR_CODE_IS_INVALID: 'Mã QR PayOS không hợp lệ',
+  PAYOS_CHECKOUT_URL_IS_INVALID: 'URL thanh toán PayOS không hợp lệ'
+}
+
+export const QOS_INSTANCE_MESSAGE = {
+  CREATED_SUCCESSFUL: 'Tạo QoS Instance thành công',
+  UPDATED_SUCCESSFUL: 'Cập nhật QoS Instance thành công',
+  DELETED_SUCCESSFUL: 'Xóa QoS Instance thành công',
+  GET_ALL_SUCCESSFUL: 'Lấy danh sách QoS Instance thành công',
+  GET_DETAIL_SUCCESSFUL: 'Lấy chi tiết QoS Instance thành công',
+  ID_IS_INVALID: 'ID QoS Instance không hợp lệ',
+  USER_ID_IS_INVALID: 'ID người dùng không hợp lệ',
+  SUBSCRIPTION_ID_IS_INVALID: 'ID đăng ký không hợp lệ',
+  RATING_IS_INVALID: 'Đánh giá không hợp lệ',
+  CONTENT_IS_REQUIRED: 'Nội dung đánh giá là bắt buộc',
+  STATUS_IS_INVALID: 'Trạng thái không hợp lệ',
+  IS_PUBLIC_IS_INVALID: 'Trạng thái công khai không hợp lệ',
+  REVIEW_FOR_IS_INVALID: 'Đối tượng đánh giá không hợp lệ'
+}

@@ -9,6 +9,7 @@ import { Global, Module } from '@nestjs/common'
 import { APP_GUARD } from '@nestjs/core'
 import { JwtModule } from '@nestjs/jwt'
 import { EmailService } from './services/email.service'
+import { PayOSService } from './services/payos.service'
 import { S3Service } from './services/S3.service'
 
 const sharedServices = [
@@ -17,7 +18,8 @@ const sharedServices = [
   HashingService,
   TokenService,
   SharedUserRepository,
-  S3Service
+  S3Service,
+  PayOSService
 ]
 @Global()
 @Module({

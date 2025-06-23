@@ -1,16 +1,15 @@
 import { PaginationQueryType } from '@/shared/models/request.model'
 import { Injectable } from '@nestjs/common'
-import { SubscriptionStatus } from '@prisma/client'
-import {
-  CreateSubscriptionBodyType,
-  GetSubscriptionesResType,
-  SubscriptionType,
-  UpdateSubscriptionBodyType
-} from 'src/routes/subscription/subscription.model'
 import { PrismaService } from 'src/shared/services/prisma.service'
+import {
+  CreateQosInstanceBodyType,
+  GetQosInstanceesResType,
+  QosInstanceType,
+  UpdateQosInstanceBodyType
+} from './qos-instance.model'
 
 @Injectable()
-export class SubscriptionRepo {
+export class QosInstanceRepo {
   constructor(private prismaService: PrismaService) {}
 
   create({
@@ -18,9 +17,9 @@ export class SubscriptionRepo {
     data
   }: {
     createdById: number | null
-    data: CreateSubscriptionBodyType
-  }): Promise<SubscriptionType> {
-    return this.prismaService.subscription.create({
+    data: CreateQosInstanceBodyType
+  }): Promise<QosInstanceType> {
+    return this.prismaService.qosInstance.create({
       data: {
         ...data,
         createdById
@@ -35,9 +34,9 @@ export class SubscriptionRepo {
   }: {
     id: number
     updatedById: number
-    data: UpdateSubscriptionBodyType
-  }): Promise<SubscriptionType> {
-    return this.prismaService.subscription.update({
+    data: UpdateQosInstanceBodyType
+  }): Promise<QosInstanceType> {
+    return this.prismaService.qosInstance.update({
       where: {
         id,
         deletedAt: null
@@ -58,14 +57,14 @@ export class SubscriptionRepo {
       deletedById: number
     },
     isHard?: boolean
-  ): Promise<SubscriptionType> {
+  ): Promise<QosInstanceType> {
     return isHard
-      ? this.prismaService.subscription.delete({
+      ? this.prismaService.qosInstance.delete({
           where: {
             id
           }
         })
-      : this.prismaService.subscription.update({
+      : this.prismaService.qosInstance.update({
           where: {
             id,
             deletedAt: null
@@ -77,16 +76,16 @@ export class SubscriptionRepo {
         })
   }
 
-  async list(pagination: PaginationQueryType): Promise<GetSubscriptionesResType> {
+  async list(pagination: PaginationQueryType): Promise<GetQosInstanceesResType> {
     const skip = (pagination.page - 1) * pagination.limit
     const take = pagination.limit
     const [totalItems, data] = await Promise.all([
-      this.prismaService.subscription.count({
+      this.prismaService.qosInstance.count({
         where: {
           deletedAt: null
         }
       }),
-      this.prismaService.subscription.findMany({
+      this.prismaService.qosInstance.findMany({
         where: {
           deletedAt: null
         },
@@ -95,15 +94,18 @@ export class SubscriptionRepo {
             select: {
               id: true,
               name: true,
-              email: true
+              email: true,
+              avatar: true
             }
           },
-          servicePlan: {
+          subscription: {
             select: {
               id: true,
-              name: true,
-              price: true,
-              description: true
+              restaurantName: true,
+              restaurantAddress: true,
+              restaurantPhone: true,
+              restaurantType: true,
+              servicePlanId: true
             }
           }
         },
@@ -120,8 +122,8 @@ export class SubscriptionRepo {
     }
   }
 
-  findById(id: number): Promise<SubscriptionType | null> {
-    return this.prismaService.subscription.findUnique({
+  findById(id: number): Promise<QosInstanceType | null> {
+    return this.prismaService.qosInstance.findUnique({
       where: {
         id,
         deletedAt: null
@@ -129,8 +131,8 @@ export class SubscriptionRepo {
     })
   }
 
-  findWithUserServicePlanById(id: number): Promise<SubscriptionType | null> {
-    return this.prismaService.subscription.findUnique({
+  findWithCategoryById(id: number): Promise<QosInstanceType | null> {
+    return this.prismaService.qosInstance.findUnique({
       where: {
         id,
         deletedAt: null
@@ -140,30 +142,21 @@ export class SubscriptionRepo {
           select: {
             id: true,
             name: true,
-            email: true
+            email: true,
+            avatar: true
           }
         },
-        servicePlan: {
+        subscription: {
           select: {
             id: true,
-            name: true,
-            price: true,
-            description: true
+            restaurantName: true,
+            restaurantAddress: true,
+            restaurantPhone: true,
+            restaurantType: true,
+            servicePlanId: true
           }
         }
       }
     })
-  }
-
-  isSubscriptionPaid(id): Promise<boolean> {
-    return this.prismaService.subscription
-      .findFirst({
-        where: {
-          id,
-          deletedAt: null,
-          status: SubscriptionStatus.PAID
-        }
-      })
-      .then((subscription) => !!subscription)
   }
 }
