@@ -102,3 +102,19 @@ export const PAYMENT_MESSAGE = {
   PAYOS_QR_CODE_IS_INVALID: 'Mã QR PayOS không hợp lệ',
   PAYOS_CHECKOUT_URL_IS_INVALID: 'URL thanh toán PayOS không hợp lệ'
 }
+
+export const QOS_INSTANCE_MESSAGE = {
+  CREATED_SUCCESSFUL: 'Tạo QoS Instance thành công',
+  UPDATED_SUCCESSFUL: 'Cập nhật QoS Instance thành công',
+  DELETED_SUCCESSFUL: 'Xóa QoS Instance thành công',
+  GET_ALL_SUCCESSFUL: 'Lấy danh sách QoS Instance thành công',
+  GET_DETAIL_SUCCESSFUL: 'Lấy chi tiết QoS Instance thành công',
+  ID_IS_INVALID: 'ID QoS Instance không hợp lệ',
+  USER_ID_IS_INVALID: 'ID người dùng không hợp lệ',
+  SUBSCRIPTION_ID_IS_INVALID: 'ID đăng ký không hợp lệ',
+  RATING_IS_INVALID: 'Đánh giá không hợp lệ',
+  CONTENT_IS_REQUIRED: 'Nội dung đánh giá là bắt buộc',
+  STATUS_IS_INVALID: 'Trạng thái không hợp lệ',
+  IS_PUBLIC_IS_INVALID: 'Trạng thái công khai không hợp lệ',
+  REVIEW_FOR_IS_INVALID: 'Đối tượng đánh giá không hợp lệ'
+}

@@ -18,6 +18,7 @@ model User {
   subscriptions Subscription[]
   reviews       Review[]
   payments      Payment[]
+  qosInstances  QosInstance[]
 
   createdServicePlans  ServicePlan[]  @relation("ServicePlanCreatedBy")
   updatedServicePlans  ServicePlan[]  @relation("ServicePlanUpdatedBy")
@@ -33,6 +34,9 @@ model User {
   createdBlog          Blog[]         @relation("BlogCreatedBy")
   updatedBlog          Blog[]         @relation("BlogUpdatedBy")
   deletedBlog          Blog[]         @relation("BlogDeletedBy")
+  createdQosInstance   QosInstance[]  @relation("QosInstanceCreatedBy")
+  updatedQosInstance   QosInstance[]  @relation("QosInstanceUpdatedBy")
+  deletedQosInstance   QosInstance[]  @relation("QosInstanceDeletedBy")
 
   createdById  Int?
   createdBy    User?  @relation("CreatorUsers", fields: [createdById], references: [id], onDelete: SetNull, onUpdate: NoAction)
@@ -105,8 +109,9 @@ model Subscription {
   endDate   DateTime?
   status    SubscriptionStatus @default(PENDING) // Trạng thái: PENDING, PAID, ACTIVE, EXPIRED, CANCELLED
 
-  reviews  Review[]
-  payments Payment[]
+  reviews     Review[]
+  payments    Payment[]
+  qosInstance QosInstance?
 
   // Audit fields
   createdById Int?
@@ -255,6 +260,52 @@ model Blog {
   @@index([deletedAt])
 }
 
+model QosInstance {
+  id     Int  @id @default(autoincrement())
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  subscriptionId Int          @unique
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  dbUrl    String?           @db.VarChar(1000)
+  statusDb QosInstanceStatus @default(INACTIVE)
+
+  frontEndUrl String?           @db.VarChar(1000)
+  statusFE    QosInstanceStatus @default(INACTIVE)
+
+  backEndUrl String?           @db.VarChar(1000)
+  statusBE   QosInstanceStatus @default(INACTIVE)
+
+  // Technical info
+  serverInfo String? // server specs, location, etc.
+  dbSize     Float?    @default(0.0) // MB
+  lastBackup DateTime?
+
+  // Health monitoring
+  lastPing     DateTime?
+  responseTime Float?    @default(0.0) // ms
+  uptime       Float?    @default(0.0) // percentage
+
+  // Deployment info
+  version    String?   @db.VarChar(50)
+  deployedAt DateTime?
+
+  // Audit fields
+  createdById Int?
+  createdBy   User? @relation("QosInstanceCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedById Int?
+  updatedBy   User? @relation("QosInstanceUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  deletedById Int?
+  deletedBy   User? @relation("QosInstanceDeletedBy", fields: [deletedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([deletedAt])
+}
+
 enum BlogStatus {
   DRAFT
   PUBLISHED
@@ -308,4 +359,12 @@ enum PaymentStatus {
   CANCELLED // Đã hủy
   EXPIRED // Đã hết hạn
   REFUNDED // Đã hoàn tiền
+}
+
+enum QosInstanceStatus {
+  ACTIVE
+  INACTIVE
+  MAINTENANCE
+  DEPLOYING
+  ERROR
 }
