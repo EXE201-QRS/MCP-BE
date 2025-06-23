@@ -31,7 +31,14 @@ const configSchema = z.object({
   S3_REGION: z.string(),
   S3_ACCESS_KEY: z.string(),
   S3_SECRET_KEY: z.string(),
-  S3_BUCKET_NAME: z.string()
+  S3_BUCKET_NAME: z.string(),
+  //PayOS
+  PAYOS_API_KEY: z.string(),
+  PAYOS_CLIENT_ID: z.string(),
+  PAYOS_CHECKSUM_KEY: z.string(),
+
+  //FE
+  FE_URL: z.string()
   // GOOGLE_CLIENT_ID: z.string(),
   // GOOGLE_CLIENT_SECRET: z.string(),
   // GOOGLE_REDIRECT_URI: z.string(),
