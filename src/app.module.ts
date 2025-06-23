@@ -7,6 +7,7 @@ import { Module } from '@nestjs/common'
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core'
 import { ZodSerializerInterceptor } from 'nestjs-zod'
 import { AuthModule } from './routes/auth/auth.module'
+import { BlogModule } from './routes/blog/blog.module'
 import { MediaModule } from './routes/media/media.module'
 import { PaymentModule } from './routes/payment/payment.module'
 import { ReviewModule } from './routes/review/review.module'
@@ -22,6 +23,7 @@ import { SharedModule } from './shared/shared.module'
     SubscriptionModule,
     ReviewModule,
     MediaModule,
+    BlogModule,
     PaymentModule
   ],
   controllers: [],
