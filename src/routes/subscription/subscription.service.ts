@@ -83,7 +83,7 @@ export class SubscriptionService {
     }
   }
 
-  async list(pagination: PaginationQueryType) {
+  async list(pagination: PaginationQueryType & { userId?: number }) {
     const data = await this.subsRepo.list(pagination)
     return data
   }

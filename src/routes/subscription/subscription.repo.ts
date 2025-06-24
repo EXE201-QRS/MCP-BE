@@ -77,19 +77,24 @@ export class SubscriptionRepo {
         })
   }
 
-  async list(pagination: PaginationQueryType): Promise<GetSubscriptionesResType> {
+  async list(
+    pagination: PaginationQueryType & { userId?: number }
+  ): Promise<GetSubscriptionesResType> {
     const skip = (pagination.page - 1) * pagination.limit
     const take = pagination.limit
+
+    // Build where clause với userId filter
+    const whereClause = {
+      deletedAt: null,
+      ...(pagination.userId && { userId: pagination.userId })
+    }
+
     const [totalItems, data] = await Promise.all([
       this.prismaService.subscription.count({
-        where: {
-          deletedAt: null
-        }
+        where: whereClause
       }),
       this.prismaService.subscription.findMany({
-        where: {
-          deletedAt: null
-        },
+        where: whereClause,
         include: {
           user: {
             select: {
@@ -108,7 +113,10 @@ export class SubscriptionRepo {
           }
         },
         skip,
-        take
+        take,
+        orderBy: {
+          createdAt: 'desc'
+        }
       })
     ])
     return {
