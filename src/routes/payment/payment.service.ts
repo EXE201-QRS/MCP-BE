@@ -159,21 +159,45 @@ export class PaymentService {
         return {
           success: false,
           message: `Không tìm thấy thanh toán với orderCode: ${orderCode}`,
-          redirect: `${feUrl}/manage/payment?error=payment_not_found&paymentId=${paymentId}`
+          redirect: `${feUrl}/payment/failed?error=payment_not_found&orderCode=${orderCode}`
         }
       }
 
       // Nếu đã thanh toán thành công trước đó
       if (payment.status === PAYMENT_STATUS.PAID) {
+        // Lấy thêm thông tin subscription và service plan cho redirect
+        const [subsItem, servicePlanItem] = await Promise.all([
+          this.subsRepo.findById(payment.subscriptionId),
+          payment.subscriptionId
+            ? this.subsRepo
+                .findById(payment.subscriptionId)
+                .then((sub) =>
+                  sub ? this.serPlanRepo.findById(sub.servicePlanId) : null
+                )
+            : null
+        ])
+
         return {
           success: true,
           message: 'Thanh toán đã được xử lý thành công',
-          redirect: `${feUrl}/manage/payment?success=true&paymentId=${payment.id}`
+          redirect: `${feUrl}/payment/success?orderId=${payment.payosOrderId}&amount=${payment.amount}&planName=${encodeURIComponent(servicePlanItem?.name || '')}&restaurantName=${encodeURIComponent(subsItem?.restaurantName || '')}`
         }
       }
 
       // Xử lý theo code trả về từ PayOS
       if (code === '00' && status === 'PAID' && !cancel) {
+        // Lấy thông tin subscription và service plan
+        const [subsItem, servicePlanItem] = await Promise.all([
+          this.subsRepo.findById(payment.subscriptionId),
+          payment.subscriptionId
+            ? this.subsRepo
+                .findById(payment.subscriptionId)
+                .then((sub) =>
+                  sub ? this.serPlanRepo.findById(sub.servicePlanId) : null
+                )
+            : null
+        ])
+
         // Thanh toán thành công
         await this.paymentRepo.updatePayment(payment.id, {
           status: PAYMENT_STATUS.PAID,
@@ -188,7 +212,7 @@ export class PaymentService {
         return {
           success: true,
           message: 'Thanh toán thành công',
-          redirect: `${feUrl}/manage/payment?success=true&paymentId=${payment.id}`
+          redirect: `${feUrl}/payment/success?orderId=${payment.payosOrderId}&amount=${payment.amount}&planName=${encodeURIComponent(servicePlanItem?.name || '')}&restaurantName=${encodeURIComponent(subsItem?.restaurantName || '')}`
         }
       } else {
         // Thanh toán thất bại hoặc bị hủy
@@ -205,7 +229,7 @@ export class PaymentService {
         return {
           success: false,
           message: failureReason,
-          redirect: `${feUrl}/manage/payment?error=payment_failed&paymentId=${paymentId}&reason=${encodeURIComponent(failureReason)}`
+          redirect: `${feUrl}/payment/failed?error=payment_failed&orderCode=${orderCode}&reason=${encodeURIComponent(failureReason)}`
         }
       }
     } catch (error) {
@@ -213,7 +237,7 @@ export class PaymentService {
       return {
         success: false,
         message: `Lỗi xử lý return PayOS: ${error.message}`,
-        redirect: `${feUrl}/manage/payment?error=system_error&paymentId=${returnData.paymentId}`
+        redirect: `${feUrl}/payment/failed?error=system_error&orderCode=${returnData.orderCode}`
       }
     }
   }
@@ -248,14 +272,14 @@ export class PaymentService {
       return {
         success: false,
         message: 'Thanh toán đã bị hủy',
-        redirect: `${feUrl}/manage/payment?error=payment_cancelled&paymentId=${paymentId}`
+        redirect: `${feUrl}/payment/failed?error=payment_cancelled&orderCode=${orderCode}`
       }
     } catch (error) {
       console.error('PayOS Cancel Handler Error:', error)
       return {
         success: false,
         message: `Lỗi xử lý cancel PayOS: ${error.message}`,
-        redirect: `${feUrl}/manage/payment?error=system_error&paymentId=${cancelData.paymentId}`
+        redirect: `${feUrl}/payment/failed?error=system_error&orderCode=${cancelData.orderCode}`
       }
     }
   }
