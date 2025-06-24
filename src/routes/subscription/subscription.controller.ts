@@ -18,12 +18,29 @@ export class SubscriptionController {
   constructor(private readonly dishService: SubscriptionService) {}
 
   @Get()
-  @IsPublic()
   @ZodSerializerDto(GetSubscriptionesResDTO)
-  list(@Query() query: PaginationQueryDTO) {
+  list(@Query() query: PaginationQueryDTO, @ActiveUser('userId') userId: number) {
+    return this.dishService.list({
+      page: query.page,
+      limit: query.limit,
+      userId
+    })
+  }
+
+  @Get('admin/all')
+  @ZodSerializerDto(GetSubscriptionesResDTO)
+  adminListAll(
+    @Query() query: PaginationQueryDTO,
+    @ActiveUser('roleName') roleName: string
+  ) {
+    // Only admin can access all subscriptions
+    if (roleName !== 'ADMIN_SYSTEM') {
+      throw new Error('Unauthorized')
+    }
     return this.dishService.list({
       page: query.page,
       limit: query.limit
+      // No userId filter for admin
     })
   }
 
