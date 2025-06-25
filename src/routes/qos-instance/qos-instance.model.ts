@@ -10,7 +10,7 @@ export const QosInstanceSchema = z.object({
   id: z.number(),
   userId: checkIdSchema(QOS_INSTANCE_MESSAGE.USER_ID_IS_INVALID),
   subscriptionId: checkIdSchema(QOS_INSTANCE_MESSAGE.SUBSCRIPTION_ID_IS_INVALID),
-  dbUrl: z.string().url().nullable(),
+  dbName: z.string().nullable(),
   statusDb: z
     .enum([
       QosInstanceStatus.ACTIVE,
@@ -104,7 +104,7 @@ export const CreateQosInstanceBodySchema = QosInstanceSchema.pick({
 })
   .strict()
   .extend({
-    dbUrl: QosInstanceSchema.shape.dbUrl.optional(),
+    dbName: QosInstanceSchema.shape.dbName.optional(),
     frontEndUrl: QosInstanceSchema.shape.frontEndUrl.optional(),
     backEndUrl: QosInstanceSchema.shape.backEndUrl.optional(),
     statusDb: QosInstanceSchema.shape.statusDb.optional(),
