@@ -57,6 +57,36 @@ export const SubscriptionWithUserServicePlanSchema = SubscriptionSchema.extend({
   })
 })
 
+export const SubscriptionWithQosInstanceServicePlanSchema = SubscriptionSchema.extend({
+  qosInstance: z
+    .object({
+      id: z.number(),
+      backEndUrl: z.string().url().nullable()
+    })
+    .nullable(),
+  servicePlan: ServicePlanSchema.pick({
+    id: true,
+    name: true,
+    price: true,
+    description: true
+  })
+})
+
+export const SubscriptionWithQosInstanceServicePlanResSchema = z.object({
+  data: z.object({
+    ...SubscriptionWithQosInstanceServicePlanSchema.shape,
+    healthCheck: z
+      .object({
+        amountUser: z.number().nullable(),
+        amountTable: z.number().nullable(),
+        amountOrder: z.number().nullable(),
+        usedStorage: z.string().nullable()
+      })
+      .nullable()
+  }),
+  message: z.string()
+})
+
 //GET
 export const GetSubscriptionesResSchema = z.object({
   data: z.array(SubscriptionWithUserServicePlanSchema),
@@ -108,3 +138,7 @@ export type GetSubscriptionDetailResWithUserServicePlanType = z.infer<
   typeof GetSubscriptionDetailResWithUserServicePlanSchema
 >
 export type GetSubscriptionesResType = z.infer<typeof GetSubscriptionesResSchema>
+
+export type SubscriptionWithQosInstanceServicePlanType = z.infer<
+  typeof SubscriptionWithQosInstanceServicePlanSchema
+>

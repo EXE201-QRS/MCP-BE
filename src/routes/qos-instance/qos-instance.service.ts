@@ -99,7 +99,7 @@ export class QosInstanceService {
     if (!this.isAdmin(roleName)) {
       throw UnauthorizedAccessException
     }
-    const qosInstance = await this.qosInstanceRepo.findWithCategoryById(id)
+    const qosInstance = await this.qosInstanceRepo.findWithUserSubsById(id)
     if (!qosInstance) {
       throw NotFoundRecordException
     }

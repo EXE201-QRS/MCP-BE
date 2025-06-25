@@ -10,6 +10,7 @@ import {
   GetSubscriptionDetailResWithUserServicePlanDTO,
   GetSubscriptionesResDTO,
   GetSubscriptionParamsDTO,
+  GetSubscriptionWithQosInstanceServicePlanDTO,
   UpdateSubscriptionBodyDTO
 } from './subscription.dto'
 import { SubscriptionService } from './subscription.service'
@@ -86,5 +87,11 @@ export class SubscriptionController {
       id: params.subscriptionId,
       deletedById: userId
     })
+  }
+  @Get(':subscriptionId/qos-health')
+  @IsPublic()
+  @ZodSerializerDto(GetSubscriptionWithQosInstanceServicePlanDTO)
+  getInfoQos(@Param() params: GetSubscriptionParamsDTO) {
+    return this.dishService.getInfoQos(params.subscriptionId)
   }
 }
