@@ -5,6 +5,7 @@ import {
   GetSubscriptionDetailResWithUserServicePlanSchema,
   GetSubscriptionesResSchema,
   GetSubscriptionParamsSchema,
+  SubscriptionWithQosInstanceServicePlanResSchema,
   UpdateSubscriptionBodySchema
 } from './subscription.model'
 
@@ -16,6 +17,10 @@ export class GetSubscriptionDetailResDTO extends createZodDto(
 
 export class GetSubscriptionDetailResWithUserServicePlanDTO extends createZodDto(
   GetSubscriptionDetailResWithUserServicePlanSchema
+) {}
+
+export class GetSubscriptionWithQosInstanceServicePlanDTO extends createZodDto(
+  SubscriptionWithQosInstanceServicePlanResSchema
 ) {}
 
 export class GetSubscriptionesResDTO extends createZodDto(GetSubscriptionesResSchema) {}

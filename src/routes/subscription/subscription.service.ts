@@ -13,9 +13,16 @@ import {
 } from './subscription.model'
 import { SubscriptionRepo } from './subscription.repo'
 
+import envConfig from '@/config/env.config'
+import { HttpService } from '@nestjs/axios'
+import { firstValueFrom } from 'rxjs'
+
 @Injectable()
 export class SubscriptionService {
-  constructor(private subsRepo: SubscriptionRepo) {}
+  constructor(
+    private subsRepo: SubscriptionRepo,
+    private readonly httpService: HttpService
+  ) {}
 
   async create({
     data,
@@ -113,6 +120,39 @@ export class SubscriptionService {
         throw NotFoundRecordException
       }
       throw error
+    }
+  }
+
+  async getInfoQos(id: number) {
+    const subs = await this.subsRepo.findWithQosInstanceServicePlanById(id)
+    let healthInfo = null
+    if (!subs || !subs.qosInstance) {
+      return {
+        data: healthInfo,
+        message: SUBSCRIPTION_MESSAGE.GET_DETAIL_SUCCESSFUL
+      }
+    }
+
+    try {
+      const url = `${subs.qosInstance.backEndUrl}/health/info`
+      const res = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: {
+            'x-api-key': envConfig.SECRET_API_KEY || ''
+          }
+        })
+      )
+      healthInfo = res.data.data
+    } catch (err) {
+      throw err
+    }
+
+    return {
+      data: {
+        healthCheck: healthInfo,
+        ...subs
+      },
+      message: SUBSCRIPTION_MESSAGE.GET_DETAIL_SUCCESSFUL
     }
   }
 }

@@ -5,6 +5,7 @@ import {
   CreateSubscriptionBodyType,
   GetSubscriptionesResType,
   SubscriptionType,
+  SubscriptionWithQosInstanceServicePlanType,
   UpdateSubscriptionBodyType
 } from 'src/routes/subscription/subscription.model'
 import { PrismaService } from 'src/shared/services/prisma.service'
@@ -173,5 +174,29 @@ export class SubscriptionRepo {
         }
       })
       .then((subscription) => !!subscription)
+  }
+
+  findWithQosInstanceServicePlanById(
+    id: number
+  ): Promise<SubscriptionWithQosInstanceServicePlanType | null> {
+    return this.prismaService.subscription.findUnique({
+      where: { id, deletedAt: null },
+      include: {
+        qosInstance: {
+          select: {
+            id: true,
+            backEndUrl: true
+          }
+        },
+        servicePlan: {
+          select: {
+            id: true,
+            name: true,
+            price: true,
+            description: true
+          }
+        }
+      }
+    })
   }
 }

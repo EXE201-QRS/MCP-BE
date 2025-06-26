@@ -268,7 +268,7 @@ model QosInstance {
   subscriptionId Int          @unique
   subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
 
-  dbUrl    String?           @db.VarChar(1000)
+  dbName   String?           @db.VarChar(1000)
   statusDb QosInstanceStatus @default(INACTIVE)
 
   frontEndUrl String?           @db.VarChar(1000)

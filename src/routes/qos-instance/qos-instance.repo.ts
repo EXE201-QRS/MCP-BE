@@ -131,7 +131,7 @@ export class QosInstanceRepo {
     })
   }
 
-  findWithCategoryById(id: number): Promise<QosInstanceType | null> {
+  findWithUserSubsById(id: number): Promise<QosInstanceType | null> {
     return this.prismaService.qosInstance.findUnique({
       where: {
         id,
