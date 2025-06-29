@@ -1,7 +1,7 @@
 import { ActiveUser } from '@/common/decorators/active-user.decorator'
 import { IsPublic } from '@/common/decorators/auth.decorator'
 import {
-  GetAccountProfileResDTO,
+  GetUserProfileResDTO,
   LoginBodyDTO,
   LoginResDTO,
   RegisterBodyDTO,
@@ -39,7 +39,7 @@ export class AuthController {
   }
 
   @Get('me')
-  @ZodSerializerDto(GetAccountProfileResDTO)
+  @ZodSerializerDto(GetUserProfileResDTO)
   me(@ActiveUser('userId') userId: number) {
     return this.authService.getMe(userId)
   }

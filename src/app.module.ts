@@ -16,6 +16,7 @@ import { QosInstanceModule } from './routes/qos-instance/qos-instance.module'
 import { ReviewModule } from './routes/review/review.module'
 import { ServicePlanModule } from './routes/service-plan/service-plan.module'
 import { SubscriptionModule } from './routes/subscription/subscription.module'
+import { UserModule } from './routes/user/user.module'
 import { SharedModule } from './shared/shared.module'
 
 @Module({
@@ -29,7 +30,8 @@ import { SharedModule } from './shared/shared.module'
     MediaModule,
     BlogModule,
     PaymentModule,
-    QosInstanceModule
+    QosInstanceModule,
+    UserModule
   ],
   controllers: [],
   providers: [
