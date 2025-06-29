@@ -4,7 +4,11 @@ import { z } from 'zod'
 export const UserSchema = z.object({
   id: z.number(),
   email: z.string().email(),
-  name: z.string().min(1).max(100).nullable(),
+  name: z
+    .string()
+    .max(100)
+    .transform((val) => (val === '' ? null : val))
+    .nullable(),
   roleName: z.enum([Role.ADMIN_SYSTEM, Role.CUSTOMER]).default(Role.CUSTOMER),
   password: z.string().min(6).max(100),
   phoneNumber: z.string().min(9).max(15).nullable(),
