@@ -58,8 +58,7 @@ export class SendMailToPaymentCronjob {
         servicePlanName: servicePlan.name,
         amount: (countDate / 30) * servicePlan.price,
         description: servicePlan.description || '',
-        statusPayment: statusText,
-        buttonText: 'Bạn đã thanh toán chưa ?. Hãy thanh toán ngay'
+        statusPayment: statusText
       })
 
       if (error) {
