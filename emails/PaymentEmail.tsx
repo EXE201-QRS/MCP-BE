@@ -38,6 +38,7 @@ interface PaymentEmailProps {
   restaurantName?: string
   orderCode?: string
   paymentMethod?: string
+  statusPayment?: string
 }
 
 export const PaymentEmail = ({
@@ -47,16 +48,20 @@ export const PaymentEmail = ({
   duration = 'tháng',
   description,
   features = defaultFeatures,
-  buttonText = 'Thanh toán ngay',
+  buttonText = 'Thanh toán dịch vụ Scanorderly',
   buttonUrl = '#',
   restaurantName,
   orderCode,
-  paymentMethod = 'Chuyển khoản ngân hàng'
+  paymentMethod = 'Chuyển khoản ngân hàng',
+  statusPayment = 'Chờ thanh toán'
 }: PaymentEmailProps) => (
   <Html>
     <Head />
     <Preview>
-      Hóa đơn thanh toán gói dịch vụ {title} - QOS Management System
+      {statusPayment === 'Đã thanh toán' 
+        ? `✅ Thanh toán thành công gói ${title} - Scanorderly`
+        : `Hóa đơn thanh toán gói ${title} - Scanorderly`
+      }
     </Preview>
     <Body style={main}>
       <Container style={container}>
@@ -65,10 +70,10 @@ export const PaymentEmail = ({
           <Row>
             <Column>
               <Img
-                src="https://via.placeholder.com/150x50/6366f1/ffffff?text=QOS+Logo"
+                src="https://via.placeholder.com/150x50/6366f1/ffffff?text=Scanorderly"
                 width="150"
                 height="50"
-                alt="QOS Logo"
+                alt="Scanorderly Logo"
                 style={logo}
               />
             </Column>
@@ -76,53 +81,82 @@ export const PaymentEmail = ({
         </Section>
 
         {/* Hero Section */}
-        <Section style={heroSection}>
+        <Section style={statusPayment === 'Đã thanh toán' ? successHeroSection : heroSection}>
+          <div style={statusIcon}>
+            {statusPayment === 'Đã thanh toán' ? '✅' : '🎉'}
+          </div>
           <Heading style={heroTitle}>
-            🎉 Cảm ơn bạn đã chọn QOS!
+            {statusPayment === 'Đã thanh toán' 
+              ? 'Thanh toán thành công!'
+              : 'Cảm ơn bạn đã chọn Scanorderly!'
+            }
           </Heading>
           <Text style={heroText}>
-            Hóa đơn thanh toán cho gói dịch vụ <strong>{title}</strong> của bạn đã sẵn sàng.
+            {statusPayment === 'Đã thanh toán' 
+              ? `Gói dịch vụ ${title} đã được kích hoạt thành công. Bạn có thể bắt đầu sử dụng ngay bây giờ.`
+              : `Hóa đơn thanh toán cho gói dịch vụ ${title} của bạn đã sẵn sàng.`
+            }
           </Text>
+        </Section>
+
+        {/* Payment Status Banner */}
+        <Section style={statusBanner}>
+          <div style={statusPayment === 'Đã thanh toán' ? statusPaidBadge : statusPendingBadge}>
+            {statusPayment === 'Đã thanh toán' ? '✅ ĐÃ THANH TOÁN' : '⏳ CHỜ THANH TOÁN'}
+          </div>
         </Section>
 
         {/* Customer Info */}
         <Section style={infoSection}>
-          <Row>
-            <Column style={infoLabel}>
-              <Text style={labelText}>Khách hàng:</Text>
-            </Column>
-            <Column style={infoValue}>
-              <Text style={valueText}>{customerName}</Text>
-            </Column>
-          </Row>
-          {restaurantName && (
+          <Heading style={sectionTitle}>📋 Thông tin thanh toán</Heading>
+          <div style={infoCard}>
             <Row>
               <Column style={infoLabel}>
-                <Text style={labelText}>Nhà hàng:</Text>
+                <Text style={labelText}>Khách hàng:</Text>
               </Column>
               <Column style={infoValue}>
-                <Text style={valueText}>{restaurantName}</Text>
+                <Text style={valueText}>{customerName}</Text>
               </Column>
             </Row>
-          )}
-          {orderCode && (
+            {restaurantName && (
+              <Row>
+                <Column style={infoLabel}>
+                  <Text style={labelText}>Nhà hàng:</Text>
+                </Column>
+                <Column style={infoValue}>
+                  <Text style={valueText}>{restaurantName}</Text>
+                </Column>
+              </Row>
+            )}
+            {orderCode && (
+              <Row>
+                <Column style={infoLabel}>
+                  <Text style={labelText}>Mã đơn hàng:</Text>
+                </Column>
+                <Column style={infoValue}>
+                  <Text style={codeText}>#{orderCode}</Text>
+                </Column>
+              </Row>
+            )}
             <Row>
               <Column style={infoLabel}>
-                <Text style={labelText}>Mã đơn hàng:</Text>
+                <Text style={labelText}>Phương thức:</Text>
               </Column>
               <Column style={infoValue}>
-                <Text style={valueText}>#{orderCode}</Text>
+                <Text style={valueText}>{paymentMethod}</Text>
               </Column>
             </Row>
-          )}
-          <Row>
-            <Column style={infoLabel}>
-              <Text style={labelText}>Phương thức:</Text>
-            </Column>
-            <Column style={infoValue}>
-              <Text style={valueText}>{paymentMethod}</Text>
-            </Column>
-          </Row>
+            <Row>
+              <Column style={infoLabel}>
+                <Text style={labelText}>Trạng thái:</Text>
+              </Column>
+              <Column style={infoValue}>
+                <Text style={statusPayment === 'Đã thanh toán' ? paidStatusText : pendingStatusText}>
+                  {statusPayment}
+                </Text>
+              </Column>
+            </Row>
+          </div>
         </Section>
 
         {/* Service Package Card */}
@@ -152,16 +186,64 @@ export const PaymentEmail = ({
             ))}
           </div>
 
-          {/* CTA Button */}
-          <Button style={ctaButton} href={buttonUrl}>
-            {buttonText}
-          </Button>
+          {/* CTA Button - Only show if not paid */}
+          {statusPayment !== 'Đã thanh toán' && (
+            <Button style={ctaButton} href={buttonUrl}>
+              {buttonText}
+            </Button>
+          )}
+
+          {/* Success Message for paid */}
+          {statusPayment === 'Đã thanh toán' && (
+            <div style={successMessage}>
+              <Text style={successMessageText}>
+                🎊 Gói dịch vụ đã được kích hoạt thành công! Bạn có thể đăng nhập vào hệ thống để bắt đầu sử dụng.
+              </Text>
+            </div>
+          )}
         </Section>
+
+        {/* Next Steps (for paid status) */}
+        {statusPayment === 'Đã thanh toán' && (
+          <Section style={nextStepsSection}>
+            <Heading style={sectionTitle}>🚀 Bước tiếp theo</Heading>
+            
+            <div style={stepCard}>
+              <div style={stepNumber}>1</div>
+              <div style={stepContent}>
+                <Text style={stepTitle}>Đăng nhập hệ thống</Text>
+                <Text style={stepDesc}>
+                  Sử dụng thông tin tài khoản để truy cập vào Scanorderly và bắt đầu thiết lập nhà hàng
+                </Text>
+              </div>
+            </div>
+
+            <div style={stepCard}>
+              <div style={stepNumber}>2</div>
+              <div style={stepContent}>
+                <Text style={stepTitle}>Cấu hình menu & bàn</Text>
+                <Text style={stepDesc}>
+                  Tạo menu điện tử và thiết lập bàn ăn để khách hàng có thể đặt món qua QR code
+                </Text>
+              </div>
+            </div>
+
+            <div style={stepCard}>
+              <div style={stepNumber}>3</div>
+              <div style={stepContent}>
+                <Text style={stepTitle}>In QR code</Text>
+                <Text style={stepDesc}>
+                  Tải và in QR code cho từng bàn để bắt đầu nhận đơn hàng từ khách hàng
+                </Text>
+              </div>
+            </div>
+          </Section>
+        )}
 
         {/* Benefits Section */}
         <Section style={benefitsSection}>
           <Heading style={benefitsTitle}>
-            🚀 Tại sao chọn QOS?
+            🚀 Tại sao chọn Scanorderly?
           </Heading>
           <Row>
             <Column style={benefitItem}>
@@ -186,20 +268,27 @@ export const PaymentEmail = ({
 
         {/* Support Section */}
         <Section style={supportSection}>
-          <Text style={supportTitle}>💬 Cần hỗ trợ?</Text>
-          <Text style={supportText}>
-            Đội ngũ hỗ trợ 24/7 của chúng tôi luôn sẵn sàng giúp bạn!
-          </Text>
           <Row>
-            <Column>
-              <Link href="mailto:support@qos.com" style={supportLink}>
-                📧 support@qos.com
-              </Link>
+            <Column style={supportIconCol}>
+              <Text style={supportEmoji}>💬</Text>
             </Column>
-            <Column>
-              <Link href="tel:+84123456789" style={supportLink}>
-                📞 +84 123 456 789
-              </Link>
+            <Column style={supportContent}>
+              <Text style={supportTitle}>Cần hỗ trợ?</Text>
+              <Text style={supportText}>
+                Đội ngũ hỗ trợ 24/7 của chúng tôi luôn sẵn sàng giúp bạn thiết lập và sử dụng hệ thống!
+              </Text>
+              <Row>
+                <Column>
+                  <Link href="mailto:support@scanorderly.com" style={supportLink}>
+                    📧 support@scanorderly.com
+                  </Link>
+                </Column>
+                <Column>
+                  <Link href="tel:+84123456789" style={supportLink}>
+                    📞 +84 123 456 789
+                  </Link>
+                </Column>
+              </Row>
             </Column>
           </Row>
         </Section>
@@ -209,19 +298,24 @@ export const PaymentEmail = ({
         {/* Footer */}
         <Section style={footer}>
           <Text style={footerText}>
-            Nếu bạn không thực hiện giao dịch này, vui lòng bỏ qua email hoặc{' '}
-            <Link href="mailto:support@qos.com" style={footerLink}>
-              liên hệ hỗ trợ
-            </Link>
+            {statusPayment === 'Đã thanh toán' 
+              ? 'Email này được gửi để xác nhận thanh toán thành công của bạn.'
+              : 'Nếu bạn không thực hiện giao dịch này, vui lòng bỏ qua email hoặc'
+            }
+            {statusPayment !== 'Đã thanh toán' && (
+              <Link href="mailto:support@scanorderly.com" style={footerLink}>
+                {' liên hệ hỗ trợ'}
+              </Link>
+            )}
           </Text>
           <Text style={footerCopyright}>
-            © 2024 QOS Management System. Made with ❤️ in Vietnam.
+            © 2024 Scanorderly. Made with ❤️ in Vietnam.
           </Text>
           <div style={socialLinks}>
             <Link href="#" style={socialLink}>Facebook</Link>
-            <Text style={socialDivider}>|</Text>
+            <Text style={socialDivider}>•</Text>
             <Link href="#" style={socialLink}>LinkedIn</Link>
-            <Text style={socialDivider}>|</Text>
+            <Text style={socialDivider}>•</Text>
             <Link href="#" style={socialLink}>Website</Link>
           </div>
         </Section>
@@ -254,11 +348,24 @@ const logo = {
 }
 
 const heroSection = {
-  padding: '20px 30px 30px',
+  padding: '30px 30px 20px',
   textAlign: 'center' as const,
   background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
   borderRadius: '12px',
   margin: '0 20px'
+}
+
+const successHeroSection = {
+  padding: '30px 30px 20px',
+  textAlign: 'center' as const,
+  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+  borderRadius: '12px',
+  margin: '0 20px'
+}
+
+const statusIcon = {
+  fontSize: '48px',
+  marginBottom: '16px'
 }
 
 const heroTitle = {
@@ -274,14 +381,55 @@ const heroText = {
   fontSize: '16px',
   lineHeight: '1.5',
   margin: '0',
-  opacity: 0.9
+  opacity: 0.95
+}
+
+const statusBanner = {
+  padding: '20px',
+  textAlign: 'center' as const
+}
+
+const statusPaidBadge = {
+  background: 'linear-gradient(45deg, #10b981, #059669)',
+  color: '#ffffff',
+  fontSize: '14px',
+  fontWeight: '700',
+  padding: '12px 24px',
+  borderRadius: '25px',
+  textTransform: 'uppercase' as const,
+  letterSpacing: '1px',
+  display: 'inline-block',
+  boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)'
+}
+
+const statusPendingBadge = {
+  background: 'linear-gradient(45deg, #f59e0b, #d97706)',
+  color: '#ffffff',
+  fontSize: '14px',
+  fontWeight: '700',
+  padding: '12px 24px',
+  borderRadius: '25px',
+  textTransform: 'uppercase' as const,
+  letterSpacing: '1px',
+  display: 'inline-block',
+  boxShadow: '0 4px 12px rgba(245, 158, 11, 0.3)'
 }
 
 const infoSection = {
-  padding: '30px',
+  padding: '30px'
+}
+
+const sectionTitle = {
+  color: '#1e293b',
+  fontSize: '20px',
+  fontWeight: '700',
+  margin: '0 0 20px 0'
+}
+
+const infoCard = {
   backgroundColor: '#f8fafc',
-  margin: '20px',
-  borderRadius: '8px',
+  padding: '24px',
+  borderRadius: '12px',
   border: '1px solid #e2e8f0'
 }
 
@@ -297,14 +445,36 @@ const labelText = {
   color: '#64748b',
   fontSize: '14px',
   fontWeight: '500',
-  margin: '8px 0'
+  margin: '10px 0'
 }
 
 const valueText = {
   color: '#1e293b',
   fontSize: '14px',
   fontWeight: '600',
-  margin: '8px 0'
+  margin: '10px 0'
+}
+
+const codeText = {
+  color: '#6366f1',
+  fontSize: '14px',
+  fontWeight: '600',
+  fontFamily: 'Monaco, Consolas, monospace',
+  margin: '10px 0'
+}
+
+const paidStatusText = {
+  color: '#10b981',
+  fontSize: '14px',
+  fontWeight: '700',
+  margin: '10px 0'
+}
+
+const pendingStatusText = {
+  color: '#f59e0b',
+  fontSize: '14px',
+  fontWeight: '700',
+  margin: '10px 0'
 }
 
 const packageCard = {
@@ -411,8 +581,70 @@ const ctaButton = {
   width: '100%',
   boxSizing: 'border-box' as const,
   border: 'none',
-  cursor: 'pointer',
-  transition: 'all 0.2s ease'
+  cursor: 'pointer'
+}
+
+const successMessage = {
+  backgroundColor: '#f0fdf4',
+  border: '1px solid #bbf7d0',
+  borderRadius: '12px',
+  padding: '20px',
+  textAlign: 'center' as const
+}
+
+const successMessageText = {
+  color: '#166534',
+  fontSize: '16px',
+  fontWeight: '600',
+  margin: '0',
+  lineHeight: '1.5'
+}
+
+const nextStepsSection = {
+  padding: '30px'
+}
+
+const stepCard = {
+  display: 'flex',
+  alignItems: 'flex-start',
+  marginBottom: '20px',
+  padding: '20px',
+  backgroundColor: '#f8fafc',
+  border: '1px solid #e2e8f0',
+  borderRadius: '12px'
+}
+
+const stepNumber = {
+  backgroundColor: '#6366f1',
+  color: '#ffffff',
+  fontSize: '16px',
+  fontWeight: '700',
+  width: '32px',
+  height: '32px',
+  borderRadius: '50%',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  marginRight: '16px',
+  flexShrink: 0
+}
+
+const stepContent = {
+  flex: 1
+}
+
+const stepTitle = {
+  color: '#1e293b',
+  fontSize: '16px',
+  fontWeight: '600',
+  margin: '0 0 8px 0'
+}
+
+const stepDesc = {
+  color: '#64748b',
+  fontSize: '14px',
+  lineHeight: '1.5',
+  margin: '0'
 }
 
 const benefitsSection = {
@@ -456,11 +688,24 @@ const divider = {
 }
 
 const supportSection = {
-  padding: '20px 30px',
-  textAlign: 'center' as const,
+  padding: '24px 30px',
   backgroundColor: '#f1f5f9',
   margin: '0 20px',
-  borderRadius: '8px'
+  borderRadius: '12px'
+}
+
+const supportIconCol = {
+  width: '60px',
+  textAlign: 'center' as const
+}
+
+const supportContent = {
+  width: 'auto'
+}
+
+const supportEmoji = {
+  fontSize: '40px',
+  margin: '0'
 }
 
 const supportTitle = {
