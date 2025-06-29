@@ -1,15 +1,18 @@
+import { Role } from '@/common/constants/auth.constant'
 import { UserSchema } from 'src/shared/models/shared-user.model'
 import { z } from 'zod'
 
 //POST
-export const CreateUserBodySchema = UserSchema.pick({
-  email: true,
-  name: true,
-  phoneNumber: true,
-  avatar: true,
-  password: true,
-  roleName: true
-}).strict()
+export const CreateUserBodySchema = z
+  .object({
+    email: z.string().email(),
+    name: z.string().min(1).max(100),
+    phoneNumber: z.string().min(9).max(15).optional(),
+    avatar: z.string().optional(),
+    password: z.string().min(6).max(100),
+    roleName: z.enum([Role.ADMIN_SYSTEM, Role.CUSTOMER]).default(Role.CUSTOMER)
+  })
+  .strict()
 
 export const CreateUserResSchema = z.object({
   data: UserSchema.omit({ password: true }),
@@ -17,7 +20,16 @@ export const CreateUserResSchema = z.object({
 })
 
 //PUT
-export const UpdateUserBodySchema = CreateUserBodySchema
+export const UpdateUserBodySchema = z
+  .object({
+    email: z.string().email().optional(),
+    name: z.string().min(1).max(100).optional(),
+    phoneNumber: z.string().min(9).max(15).optional(),
+    avatar: z.string().optional(),
+    password: z.string().min(6).max(100).optional(),
+    roleName: z.enum([Role.ADMIN_SYSTEM, Role.CUSTOMER]).optional()
+  })
+  .strict()
 export const UpdateUserResSchema = CreateUserResSchema
 
 //GET
