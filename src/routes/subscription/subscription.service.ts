@@ -62,7 +62,11 @@ export class SubscriptionService {
         throw UnathoriedAfterPaymentException
       }
       //check status === ACTIVE update startDate and endDate
-      if (data.status === SubscriptionStatus.ACTIVE) {
+      if (
+        data.status === SubscriptionStatus.ACTIVE &&
+        data.startDate === null &&
+        data.endDate === null
+      ) {
         const startDate = new Date()
         const duration = parseInt(mapEnumToDays(data.durationDays as DurationDays), 10) // convert string to number
         const endDate = new Date(startDate)

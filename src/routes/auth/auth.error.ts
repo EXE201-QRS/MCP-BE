@@ -22,6 +22,12 @@ export const FailedToSendOTPException = new UnprocessableEntityException([
   }
 ])
 
+export const FailedToSendPaymentPException = new UnprocessableEntityException([
+  {
+    message: 'Error.FailedToSendPayment'
+  }
+])
+
 // Email related errors
 export const EmailAlreadyExistsException = new UnprocessableEntityException([
   {

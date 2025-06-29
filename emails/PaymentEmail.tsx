@@ -1,5 +1,5 @@
-import { Payment } from '@prisma/client'
 import React from 'react'
+import { text } from 'stream/consumers'
 
 const defaultFeatures = [
   'Mở khóa sử dụng bàn',
@@ -12,22 +12,48 @@ const defaultFeatures = [
 interface PaymentEmailProps {
   title: string
   price: string
-  description?: string,
-  buttonText?: "Thanh toán dịch vụ Scanorderly"
+  description?: string
+  buttonText?: string
+  buttonUrl?: string
+  status: string // thêm prop trạng thái
 }
+function getStatusStyle(status: string) {
 
+  if (status.toLowerCase() == 'đã thanh toán') {
+    return statusStyle
+  }
+  if (status.toLowerCase() == 'hết hạn') {
+
+    return {
+      ...statusStyle,
+      background: '#fee2e2',
+      color: '#b91c1c'
+    }
+  }
+  if (status.toLowerCase() == 'sắp hết hạn') {
+    return {
+      ...statusStyle,
+      background: '#fef9c3',
+      color: '#b45309'
+    }
+  }
+  return statusStyle
+}
 export const PaymentEmail = (data: PaymentEmailProps) => (
   <div style={main}>
     <div style={container}>
       <div style={section}>
-        <div style={offerTitle}>{data.title}</div>
+        <div style={headerRow}>
+          <div style={offerTitle}>{data.title}</div>
+          {data.status && (
+            <div style={getStatusStyle(data.status)}>{data.status}</div>
+          )}
+        </div>
         <div style={priceBox}>
           <span style={priceStyle}>{data.price}</span>
           <span style={perMonth}>/ tháng</span>
         </div>
-        <div style={desc}>
-          {data.description}
-        </div>
+        <div style={desc}>{data.description}</div>
         <ul style={featureList}>
           {defaultFeatures.map((feature) => (
             <li key={feature} style={featureItem}>
@@ -35,19 +61,23 @@ export const PaymentEmail = (data: PaymentEmailProps) => (
             </li>
           ))}
         </ul>
-        <button style={ctaButton}>{data.buttonText}</button>
+        <a
+  href={data.buttonUrl || '#'}
+  target="_blank"
+  rel="noopener noreferrer"
+  style={ctaButton}
+>
+  {data.buttonText || 'Xem ngay'}
+</a>
         <hr style={hrStyle} />
         <div style={italicNote}>
-        Nếu bạn không chủ động thực hiện hành động này, xin hãy bỏ qua email?
+          Nếu bạn không chủ động thực hiện hành động này, xin hãy bỏ qua email?
         </div>
-        <div style={footerNote}>
-          From Scanorderly with ❤️.
-        </div>
+        <div style={footerNote}>From Scanorderly with ❤️.</div>
       </div>
     </div>
   </div>
 )
-
 
 const main = {
   background: '#f4f4f6',
@@ -80,10 +110,13 @@ const section = {
 }
 
 const offerTitle = {
+  padding: '4px 8px',
+  borderRadius: 8,
+  background: '#d1fae5',
   color: '#6366f1',
   fontSize: 12,
   lineHeight: '20px',
-  fontWeight: 600,
+  fontWeight: 700,
   letterSpacing: 1,
   marginBottom: 16,
   marginTop: 16,
@@ -145,7 +178,8 @@ const ctaButton = {
   textAlign: 'center',
   width: '100%',
   border: 'none',
-  cursor: 'pointer'
+  cursor: 'pointer',
+  textDecoration: 'none',
 }
 
 const hrStyle = {
@@ -169,4 +203,21 @@ const footerNote = {
   margin: 0,
   lineHeight: '16px',
   textAlign: 'center'
+}
+
+const headerRow = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginBottom: 16
+}
+
+const statusStyle = {
+  background: '#d1fae5',
+  borderRadius: 8,
+  color: '#065f46',
+  fontSize: 12,
+  fontWeight: 500,
+  padding: '4px 8px',
+  textTransform: 'uppercase'
 }
