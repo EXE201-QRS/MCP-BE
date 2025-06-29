@@ -65,7 +65,7 @@ export const SendOTPBodySchema = VerificationCodeSchema.pick({
   type: true
 }).strict()
 
-export const GetAccountProfileResSchema = UserSchema.omit({
+export const GetUserProfileResSchema = UserSchema.omit({
   password: true
 })
 
@@ -77,4 +77,4 @@ export type SendOTPBodyType = z.infer<typeof SendOTPBodySchema>
 export type LoginBodyType = z.infer<typeof LoginBodySchema>
 export type LoginResType = z.infer<typeof LoginResSchema>
 export type ForgotPasswordBodyType = z.infer<typeof ForgotPasswordBodySchema>
-export type GetAccountProfileResType = z.infer<typeof GetAccountProfileResSchema>
+export type GetUserProfileResType = z.infer<typeof GetUserProfileResSchema>
