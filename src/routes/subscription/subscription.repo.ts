@@ -199,4 +199,22 @@ export class SubscriptionRepo {
       }
     })
   }
+
+  updateDateAfterNextPayment({
+    id,
+    data
+  }: {
+    id: number
+    data: UpdateSubscriptionBodyType
+  }) {
+    return this.prismaService.subscription.update({
+      where: {
+        id,
+        deletedAt: null
+      },
+      data: {
+        ...data
+      }
+    })
+  }
 }

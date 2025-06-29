@@ -5,7 +5,9 @@ import { AuthenticationGuard } from '@/common/guards/authentication.guard'
 import CustomZodValidationPipe from '@/common/pipes/custom-zod-validation.pipe'
 import { Module } from '@nestjs/common'
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core'
+import { ScheduleModule } from '@nestjs/schedule'
 import { ZodSerializerInterceptor } from 'nestjs-zod'
+import { SendMailToPaymentCronjob } from './cronjobs/send-mail-to-payment.cronjob'
 import { AuthModule } from './routes/auth/auth.module'
 import { BlogModule } from './routes/blog/blog.module'
 import { MediaModule } from './routes/media/media.module'
@@ -19,6 +21,7 @@ import { SharedModule } from './shared/shared.module'
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     SharedModule,
     AuthModule,
     ServicePlanModule,
@@ -46,7 +49,8 @@ import { SharedModule } from './shared/shared.module'
     {
       provide: APP_GUARD,
       useClass: AuthenticationGuard
-    }
+    },
+    SendMailToPaymentCronjob
   ]
 })
 export class AppModule {}

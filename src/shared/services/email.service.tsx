@@ -2,7 +2,6 @@ import React from 'react'
 import envConfig from '@/config/env.config'
 import { Injectable } from '@nestjs/common'
 import OTPEmail from 'emails/otp'
-
 import { Resend } from 'resend'
 import { PaymentEmail } from 'emails/PaymentEmail'
 import CreateAccountEmail from 'emails/create-account'
