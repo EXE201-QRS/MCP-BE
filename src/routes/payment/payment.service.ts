@@ -11,10 +11,11 @@ import {
   NotFoundException
 } from '@nestjs/common'
 
+import { NotFoundRecordException } from '@/shared/error'
 import { SharedUserRepository } from '@/shared/repositories/shared-user.repo'
 import { EmailService } from '@/shared/services/email.service'
 import { PayOSService } from '@/shared/services/payos.service'
-import { FailedToSendOTPException } from '../auth/auth.error'
+import { FailedToSendPaymentPException } from '../auth/auth.error'
 import { ServicePlanRepo } from '../service-plan/service-plan.repo'
 import { SubscriptionRepo } from '../subscription/subscription.repo'
 import { CreatePayOSPaymentDto, PaymentType } from './payment.model'
@@ -45,24 +46,20 @@ export class PaymentService {
       if (!servicePlanItem) {
         throw new NotFoundException(PAYMENT_MESSAGE.SERVICE_PLAN_NOT_FOUND)
       }
-      if (
-        subsItem.status !== SubscriptionStatus.PENDING &&
-        subsItem.status !== SubscriptionStatus.EXPIRED
-      ) {
+      // logic  thanh toán khi pending, expire hoặc endate ít hơn 3 ngày
+      const now = new Date().getTime()
+      const threeDaysInMs = 3 * 24 * 60 * 60 * 1000
+      const isAboutToExpire =
+        subsItem.endDate && subsItem.endDate.getTime() - now <= threeDaysInMs
+      const isAllowedToPay =
+        subsItem.status === SubscriptionStatus.PENDING ||
+        subsItem.status === SubscriptionStatus.EXPIRED ||
+        isAboutToExpire
+
+      if (!isAllowedToPay) {
         throw new ConflictException(
-          'Đơn đăng ký phải ở trạng thái pending hoặc expired để thanh toán'
+          'Chỉ được thanh toán khi đăng ký ở trạng thái pending, expired hoặc gần hết hạn (≤ 3 ngày)'
         )
-      }
-
-      if (subsItem.startDate && subsItem.endDate) {
-        const start = subsItem.startDate.getTime()
-        const end = subsItem.endDate.getTime()
-        // check ngày ít hơn 3 ngày thì cho thanh toán
-        const threeDaysInMs = 3 * 24 * 60 * 60 * 1000
-
-        if (!(start < end + threeDaysInMs || end > start)) {
-          throw new ConflictException('Đơn đăng ký chưa đến thời kì thanh toán')
-        }
       }
 
       // Generate unique order code cho PayOS
@@ -209,6 +206,8 @@ export class PaymentService {
         await this.paymentRepo.completeBillPayment(payment.id, payment.subscriptionId)
         // send mail thông báo thanh toán thành công
         this.sendMailPayment(payment)
+        this.updateDateSubscription(payment.subscriptionId)
+
         return {
           success: true,
           message: 'Thanh toán thành công',
@@ -303,10 +302,37 @@ export class PaymentService {
       email: user.email,
       servicePlanName: servicePlanItem.name,
       amount: payment.amount,
-      description: servicePlanItem.description || ''
+      description: servicePlanItem.description || '',
+      statusPayment: 'Đã thanh toán'
     })
     if (error) {
-      throw FailedToSendOTPException
+      throw FailedToSendPaymentPException
+    }
+  }
+
+  async updateDateSubscription(subsId: number) {
+    // check xem tìm subs và có startDate endDate không
+    const subsItem = await this.subsRepo.findById(subsId)
+    if (!subsItem) throw NotFoundRecordException
+    // neu co startDate và endDate thì update lại
+    if (subsItem.startDate && subsItem.endDate) {
+      // update lai status thanh active
+      subsItem.status = SubscriptionStatus.ACTIVE
+      // neu end date > now thì update lại start va end || ko thi update endDate
+      const durationDays = parseInt(mapEnumToDays(subsItem.durationDays)) || 30
+      const now = new Date()
+      if (subsItem.endDate < now) {
+        // Nếu endDate đã qua thì set startDate là now và endDate là now + durationDays
+        subsItem.startDate = now
+        subsItem.endDate = new Date(now.getTime() + durationDays * 24 * 60 * 60 * 1000)
+      } else {
+        // Nếu endDate chưa qua thì chỉ cần cộng thêm durationDays vào endDate
+        subsItem.endDate = new Date(
+          subsItem.endDate.getTime() + durationDays * 24 * 60 * 60 * 1000
+        )
+      }
+      // Cập nhật lại subscription
+      await this.subsRepo.updateDateAfterNextPayment({ id: subsId, data: subsItem })
     }
   }
 }
