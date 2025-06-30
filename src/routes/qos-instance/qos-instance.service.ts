@@ -122,10 +122,13 @@ export class QosInstanceService {
       if (!this.isAdmin(roleName)) {
         throw UnauthorizedAccessException
       }
-      await this.qosInstanceRepo.delete({
-        id,
-        deletedById
-      })
+      await this.qosInstanceRepo.delete(
+        {
+          id,
+          deletedById
+        },
+        true
+      )
       return {
         message: QOS_INSTANCE_MESSAGE.DELETED_SUCCESSFUL
       }

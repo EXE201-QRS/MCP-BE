@@ -88,6 +88,7 @@ export class SubscriptionController {
       deletedById: userId
     })
   }
+
   @Get(':subscriptionId/qos-health')
   @IsPublic()
   @ZodSerializerDto(GetSubscriptionWithQosInstanceServicePlanDTO)
