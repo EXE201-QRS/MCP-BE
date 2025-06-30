@@ -129,11 +129,24 @@ export class SubscriptionService {
 
   async getInfoQos(id: number) {
     const subs = await this.subsRepo.findWithQosInstanceServicePlanById(id)
+
+    if (!subs) {
+      throw NotFoundRecordException
+    }
+
     let healthInfo = null
-    if (!subs || !subs.qosInstance) {
+    if (
+      !subs.qosInstance ||
+      subs.qosInstance.statusBE !== 'ACTIVE' ||
+      subs.qosInstance.statusDb !== 'ACTIVE' ||
+      subs.qosInstance.statusFE !== 'ACTIVE'
+    ) {
       return {
-        data: healthInfo,
-        message: SUBSCRIPTION_MESSAGE.GET_DETAIL_SUCCESSFUL
+        data: {
+          healthCheck: null,
+          ...subs
+        },
+        message: 'Subscription is not active or QoS instance is not available'
       }
     }
 

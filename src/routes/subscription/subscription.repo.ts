@@ -185,7 +185,11 @@ export class SubscriptionRepo {
         qosInstance: {
           select: {
             id: true,
-            backEndUrl: true
+            backEndUrl: true,
+            frontEndUrl: true,
+            statusBE: true,
+            statusFE: true,
+            statusDb: true
           }
         },
         servicePlan: {

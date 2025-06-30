@@ -107,9 +107,15 @@ export const CreateQosInstanceBodySchema = QosInstanceSchema.pick({
     dbName: QosInstanceSchema.shape.dbName.optional(),
     frontEndUrl: QosInstanceSchema.shape.frontEndUrl.optional(),
     backEndUrl: QosInstanceSchema.shape.backEndUrl.optional(),
-    statusDb: QosInstanceSchema.shape.statusDb.optional(),
-    statusFE: QosInstanceSchema.shape.statusFE.optional(),
-    statusBE: QosInstanceSchema.shape.statusBE.optional(),
+    statusDb: QosInstanceSchema.shape.statusDb
+      .optional()
+      .default(QosInstanceStatus.ACTIVE),
+    statusFE: QosInstanceSchema.shape.statusFE
+      .optional()
+      .default(QosInstanceStatus.ACTIVE),
+    statusBE: QosInstanceSchema.shape.statusBE
+      .optional()
+      .default(QosInstanceStatus.ACTIVE),
     serverInfo: QosInstanceSchema.shape.serverInfo.optional(),
     dbSize: QosInstanceSchema.shape.dbSize.optional(),
     lastBackup: QosInstanceSchema.shape.lastBackup.optional(),
