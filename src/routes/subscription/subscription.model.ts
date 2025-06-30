@@ -61,7 +61,11 @@ export const SubscriptionWithQosInstanceServicePlanSchema = SubscriptionSchema.e
   qosInstance: z
     .object({
       id: z.number(),
-      backEndUrl: z.string().url().nullable()
+      backEndUrl: z.string().url().nullable(),
+      frontEndUrl: z.string().url().nullable(),
+      statusBE: z.enum(['ACTIVE', 'DEPLOYING', 'ERROR', 'INACTIVE', 'MAINTENANCE']),
+      statusFE: z.enum(['ACTIVE', 'DEPLOYING', 'ERROR', 'INACTIVE', 'MAINTENANCE']),
+      statusDb: z.enum(['ACTIVE', 'DEPLOYING', 'ERROR', 'INACTIVE', 'MAINTENANCE'])
     })
     .nullable(),
   servicePlan: ServicePlanSchema.pick({
