@@ -6,6 +6,7 @@ import {
   CreateServicePlanBodyType,
   GetServicePlansResType,
   ServicePlanType,
+  ServicePlanWithSubscribersType,
   UpdateServicePlanBodyType
 } from './service-plan.model'
 
@@ -80,7 +81,7 @@ export class ServicePlanRepo {
   async list(pagination: PaginationQueryType): Promise<GetServicePlansResType> {
     const skip = (pagination.page - 1) * pagination.limit
     const take = pagination.limit
-    const [totalItems, data] = await Promise.all([
+    const [totalItems, servicePlans] = await Promise.all([
       this.prismaService.servicePlan.count({
         where: {
           deletedAt: null
@@ -90,10 +91,40 @@ export class ServicePlanRepo {
         where: {
           deletedAt: null
         },
+        include: {
+          _count: {
+            select: {
+              subscriptions: {
+                where: {
+                  deletedAt: null,
+                  status: {
+                    in: ['PAID', 'ACTIVE'] // Chỉ đếm subscription đã thanh toán hoặc đang active
+                  }
+                }
+              }
+            }
+          }
+        },
         skip,
         take
       })
     ])
+
+    // Transform data để thêm subscribersCount
+    const data: ServicePlanWithSubscribersType[] = servicePlans.map((servicePlan) => ({
+      id: servicePlan.id,
+      name: servicePlan.name,
+      description: servicePlan.description,
+      price: servicePlan.price,
+      createdById: servicePlan.createdById,
+      updatedById: servicePlan.updatedById,
+      deletedById: servicePlan.deletedById,
+      deletedAt: servicePlan.deletedAt,
+      createdAt: servicePlan.createdAt,
+      updatedAt: servicePlan.updatedAt,
+      subscribersCount: servicePlan._count.subscriptions
+    }))
+
     return {
       data,
       totalItems,
