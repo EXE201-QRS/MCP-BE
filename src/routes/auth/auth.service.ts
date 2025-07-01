@@ -177,6 +177,9 @@ export class AuthService {
     if (!user) {
       throw EmailNotFoundException
     }
-    return user
+    return {
+      data: user,
+      message: 'Lấy thông tin người dùng thành công'
+    }
   }
 }
