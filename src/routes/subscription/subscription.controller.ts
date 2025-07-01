@@ -16,12 +16,12 @@ import {
 import { SubscriptionService } from './subscription.service'
 @Controller('subscriptions')
 export class SubscriptionController {
-  constructor(private readonly dishService: SubscriptionService) {}
+  constructor(private readonly subsService: SubscriptionService) {}
 
   @Get()
   @ZodSerializerDto(GetSubscriptionesResDTO)
   list(@Query() query: PaginationQueryDTO, @ActiveUser('userId') userId: number) {
-    return this.dishService.list({
+    return this.subsService.list({
       page: query.page,
       limit: query.limit,
       userId
@@ -38,7 +38,7 @@ export class SubscriptionController {
     if (roleName !== 'ADMIN_SYSTEM') {
       throw new Error('Unauthorized')
     }
-    return this.dishService.list({
+    return this.subsService.list({
       page: query.page,
       limit: query.limit
       // No userId filter for admin
@@ -49,13 +49,13 @@ export class SubscriptionController {
   @IsPublic()
   @ZodSerializerDto(GetSubscriptionDetailResWithUserServicePlanDTO)
   findById(@Param() params: GetSubscriptionParamsDTO) {
-    return this.dishService.findById(params.subscriptionId)
+    return this.subsService.findById(params.subscriptionId)
   }
 
   @Post()
   @ZodSerializerDto(GetSubscriptionDetailResDTO)
   create(@Body() body: CreateSubscriptionBodyDTO, @ActiveUser('userId') userId: number) {
-    return this.dishService.create({
+    return this.subsService.create({
       data: body,
       createdById: userId
     })
@@ -69,7 +69,7 @@ export class SubscriptionController {
     @ActiveUser('userId') userId: number,
     @ActiveUser('roleName') roleName: string
   ) {
-    return this.dishService.update({
+    return this.subsService.update({
       data: body,
       id: params.subscriptionId,
       updatedById: userId,
@@ -83,7 +83,7 @@ export class SubscriptionController {
     @Param() params: GetSubscriptionParamsDTO,
     @ActiveUser('userId') userId: number
   ) {
-    return this.dishService.delete({
+    return this.subsService.delete({
       id: params.subscriptionId,
       deletedById: userId
     })
@@ -93,6 +93,6 @@ export class SubscriptionController {
   @IsPublic()
   @ZodSerializerDto(GetSubscriptionWithQosInstanceServicePlanDTO)
   getInfoQos(@Param() params: GetSubscriptionParamsDTO) {
-    return this.dishService.getInfoQos(params.subscriptionId)
+    return this.subsService.getInfoQos(params.subscriptionId)
   }
 }

@@ -17,9 +17,14 @@ export const ServicePlanSchema = z
   })
   .strict()
 
-//list categories
+// Schema cho service plan với số lượng subscribers
+export const ServicePlanWithSubscribersSchema = ServicePlanSchema.extend({
+  subscribersCount: z.number().int().min(0).default(0)
+})
+
+//list service plans
 export const GetServicePlansResSchema = z.object({
-  data: z.array(ServicePlanSchema),
+  data: z.array(ServicePlanWithSubscribersSchema),
   totalItems: z.number(),
   page: z.number(),
   limit: z.number(),
@@ -46,6 +51,9 @@ export const CreateServicePlanBodySchema = ServicePlanSchema.pick({
 export const UpdateServicePlanBodySchema = CreateServicePlanBodySchema
 
 export type ServicePlanType = z.infer<typeof ServicePlanSchema>
+export type ServicePlanWithSubscribersType = z.infer<
+  typeof ServicePlanWithSubscribersSchema
+>
 export type GetServicePlansResType = z.infer<typeof GetServicePlansResSchema>
 export type GetServicePlanParamsType = z.infer<typeof GetServicePlanParamsSchema>
 export type GetServicePlanDetailResType = z.infer<typeof GetServicePlanDetailResSchema>
