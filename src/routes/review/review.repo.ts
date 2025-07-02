@@ -1,8 +1,9 @@
-import { PaginationQueryType } from '@/shared/models/request.model'
+import { ReviewStatus } from '@/common/constants/review.constant'
 import { Injectable } from '@nestjs/common'
 import {
   CreateReviewBodyType,
   GetReviewesResType,
+  GetReviewQueryType,
   ReviewType,
   UpdateReviewBodyType
 } from 'src/routes/review/review.model'
@@ -34,7 +35,7 @@ export class ReviewRepo {
   }: {
     id: number
     updatedById: number
-    data: UpdateReviewBodyType
+    data: Partial<UpdateReviewBodyType>
   }): Promise<ReviewType> {
     return this.prismaService.review.update({
       where: {
@@ -77,19 +78,42 @@ export class ReviewRepo {
         })
   }
 
-  async list(pagination: PaginationQueryType): Promise<GetReviewesResType> {
-    const skip = (pagination.page - 1) * pagination.limit
-    const take = pagination.limit
+  async list(query: GetReviewQueryType): Promise<GetReviewesResType> {
+    const {
+      page,
+      limit,
+      status,
+      reviewFor,
+      rating,
+      userId,
+      subscriptionId,
+      isPublic,
+      search
+    } = query
+    const skip = (page - 1) * limit
+    const take = limit
+
+    const where: any = {
+      deletedAt: null
+    }
+
+    if (status) where.status = status
+    if (reviewFor) where.reviewFor = reviewFor
+    if (rating) where.rating = rating
+    if (userId) where.userId = userId
+    if (subscriptionId) where.subscriptionId = subscriptionId
+    if (isPublic !== undefined) where.isPublic = isPublic
+    if (search) {
+      where.OR = [
+        { content: { contains: search, mode: 'insensitive' } },
+        { adminResponse: { contains: search, mode: 'insensitive' } }
+      ]
+    }
+
     const [totalItems, data] = await Promise.all([
-      this.prismaService.review.count({
-        where: {
-          deletedAt: null
-        }
-      }),
+      this.prismaService.review.count({ where }),
       this.prismaService.review.findMany({
-        where: {
-          deletedAt: null
-        },
+        where,
         include: {
           user: {
             select: {
@@ -119,16 +143,33 @@ export class ReviewRepo {
           }
         },
         skip,
-        take
+        take,
+        orderBy: { createdAt: 'desc' }
       })
     ])
+
     return {
       data,
       totalItems,
-      page: pagination.page,
-      limit: pagination.limit,
-      totalPages: Math.ceil(totalItems / pagination.limit)
+      page,
+      limit,
+      totalPages: Math.ceil(totalItems / limit)
     }
+  }
+
+  async getPublicReviews(query: GetReviewQueryType): Promise<GetReviewesResType> {
+    return this.list({
+      ...query,
+      isPublic: true,
+      status: ReviewStatus.APPROVED
+    })
+  }
+
+  async getPendingReviews(query: GetReviewQueryType): Promise<GetReviewesResType> {
+    return this.list({
+      ...query,
+      status: ReviewStatus.PENDING
+    })
   }
 
   findById(id: number): Promise<ReviewType | null> {

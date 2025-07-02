@@ -76,9 +76,13 @@ export const REVIEW_MESSAGE = {
   GET_DETAIL_SUCCESSFUL: 'Lấy chi tiết đánh giá thành công',
   ID_IS_INVALID: 'ID đánh giá không hợp lệ',
   USER_ID_IS_INVALID: 'ID người dùng không hợp lệ',
-
   RATING_IS_INVALID: 'Đánh giá không hợp lệ',
-  COMMENT_IS_REQUIRED: 'Bình luận là bắt buộc'
+  COMMENT_IS_REQUIRED: 'Bình luận là bắt buộc',
+  ADMIN_RESPONSE_IS_REQUIRED: 'Phản hồi của admin là bắt buộc',
+  ADMIN_RESPONSE_SUCCESSFUL: 'Phản hồi admin thành công',
+  TOGGLE_PUBLIC_SUCCESSFUL: 'Thay đổi trạng thái công khai thành công',
+  APPROVED_SUCCESSFUL: 'Duyệt đánh giá thành công',
+  REJECTED_SUCCESSFUL: 'Từ chối đánh giá thành công'
 }
 
 export const PAYMENT_MESSAGE = {

@@ -1,8 +1,7 @@
 import { REVIEW_MESSAGE } from '@/common/constants/message'
-import { ReviewStatus } from '@/common/constants/review.constant'
+import { ReviewFor, ReviewStatus } from '@/common/constants/review.constant'
 import { UserSchema } from '@/shared/models/shared-user.model'
 import { checkIdSchema } from '@/shared/utils/id.validation'
-import { ReviewFor } from '@prisma/client'
 import { z } from 'zod'
 import { SubscriptionSchema } from '../subscription/subscription.model'
 
@@ -94,11 +93,39 @@ export const UpdateReviewBodySchema = CreateReviewBodySchema.extend({
   responsedById: ReviewSchema.shape.responsedById.optional()
 })
 
+// Admin response schema
+export const AdminResponseReviewBodySchema = z
+  .object({
+    adminResponse: z.string().min(1, REVIEW_MESSAGE.ADMIN_RESPONSE_IS_REQUIRED),
+    status: z.enum([ReviewStatus.APPROVED, ReviewStatus.REJECTED]),
+    isPublic: z.boolean().optional()
+  })
+  .strict()
+
+// Query schema for filtering
+export const GetReviewQuerySchema = z
+  .object({
+    page: z.coerce.number().int().min(1).default(1),
+    limit: z.coerce.number().int().min(1).max(100).default(10),
+    status: z
+      .enum([ReviewStatus.PENDING, ReviewStatus.APPROVED, ReviewStatus.REJECTED])
+      .optional(),
+    reviewFor: z.enum([ReviewFor.PLATFORM, ReviewFor.SERVICE]).optional(),
+    rating: z.coerce.number().int().min(1).max(5).optional(),
+    userId: z.coerce.number().int().positive().optional(),
+    subscriptionId: z.coerce.number().int().positive().optional(),
+    isPublic: z.coerce.boolean().optional(),
+    search: z.string().optional() // Search in content
+  })
+  .strict()
+
 //types
 export type ReviewType = z.infer<typeof ReviewSchema>
 export type CreateReviewBodyType = z.infer<typeof CreateReviewBodySchema>
 export type UpdateReviewBodyType = z.infer<typeof UpdateReviewBodySchema>
+export type AdminResponseReviewBodyType = z.infer<typeof AdminResponseReviewBodySchema>
 export type GetReviewParamsType = z.infer<typeof GetReviewParamsSchema>
+export type GetReviewQueryType = z.infer<typeof GetReviewQuerySchema>
 export type GetReviewDetailResType = z.infer<typeof GetReviewDetailResSchema>
 export type GetReviewDetailResWithFullType = z.infer<
   typeof GetReviewDetailResWithFullSchema
