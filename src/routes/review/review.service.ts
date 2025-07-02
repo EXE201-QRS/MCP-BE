@@ -1,12 +1,16 @@
 import { REVIEW_MESSAGE, SUBSCRIPTION_MESSAGE } from '@/common/constants/message'
+import { ReviewStatus, ReviewStatusType } from '@/common/constants/review.constant'
 import { SubscriptionStatus } from '@/common/constants/subscription.constant'
 import { NotFoundRecordException } from '@/shared/error'
 import { isNotFoundPrismaError } from '@/shared/helpers'
-import { PaginationQueryType } from '@/shared/models/request.model'
 import { Injectable } from '@nestjs/common'
 import { SubscriptionRepo } from '../subscription/subscription.repo'
 import { SubscriptionHasNotPaidToReview, UnAuthorizatedToReview } from './review.error'
-import { CreateReviewBodyType, UpdateReviewBodyType } from './review.model'
+import {
+  CreateReviewBodyType,
+  GetReviewQueryType,
+  UpdateReviewBodyType
+} from './review.model'
 import { ReviewRepo } from './review.repo'
 
 @Injectable()
@@ -73,8 +77,18 @@ export class ReviewService {
     }
   }
 
-  async list(pagination: PaginationQueryType) {
-    const data = await this.reviewRepo.list(pagination)
+  async list(query: GetReviewQueryType) {
+    const data = await this.reviewRepo.list(query)
+    return data
+  }
+
+  async getPublicReviews(query: GetReviewQueryType) {
+    const data = await this.reviewRepo.getPublicReviews(query)
+    return data
+  }
+
+  async getPendingReviews(query: GetReviewQueryType) {
+    const data = await this.reviewRepo.getPendingReviews(query)
     return data
   }
 
@@ -97,6 +111,77 @@ export class ReviewService {
       })
       return {
         message: REVIEW_MESSAGE.DELETED_SUCCESSFUL
+      }
+    } catch (error) {
+      if (isNotFoundPrismaError(error)) {
+        throw NotFoundRecordException
+      }
+      throw error
+    }
+  }
+
+  async adminResponse({
+    reviewId,
+    adminResponse,
+    status,
+    isPublic,
+    responsedById
+  }: {
+    reviewId: number
+    adminResponse: string
+    status: ReviewStatusType
+    isPublic?: boolean
+    responsedById: number
+  }) {
+    try {
+      const review = await this.reviewRepo.update({
+        id: reviewId,
+        updatedById: responsedById,
+        data: {
+          adminResponse,
+          status,
+          isPublic: isPublic ?? true,
+          responsedById
+        }
+      })
+      return {
+        data: review,
+        message:
+          status === ReviewStatus.APPROVED
+            ? REVIEW_MESSAGE.APPROVED_SUCCESSFUL
+            : REVIEW_MESSAGE.REJECTED_SUCCESSFUL
+      }
+    } catch (error) {
+      if (isNotFoundPrismaError(error)) {
+        throw NotFoundRecordException
+      }
+      throw error
+    }
+  }
+
+  async togglePublic({
+    reviewId,
+    updatedById
+  }: {
+    reviewId: number
+    updatedById: number
+  }) {
+    try {
+      const currentReview = await this.reviewRepo.findById(reviewId)
+      if (!currentReview) {
+        throw NotFoundRecordException
+      }
+
+      const review = await this.reviewRepo.update({
+        id: reviewId,
+        updatedById,
+        data: {
+          isPublic: !currentReview.isPublic
+        }
+      })
+      return {
+        data: review,
+        message: REVIEW_MESSAGE.TOGGLE_PUBLIC_SUCCESSFUL
       }
     } catch (error) {
       if (isNotFoundPrismaError(error)) {

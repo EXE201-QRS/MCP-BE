@@ -8,3 +8,6 @@ export const ReviewStatus = {
   APPROVED: 'APPROVED',
   REJECTED: 'REJECTED'
 } as const
+
+export type ReviewForType = (typeof ReviewFor)[keyof typeof ReviewFor]
+export type ReviewStatusType = (typeof ReviewStatus)[keyof typeof ReviewStatus]

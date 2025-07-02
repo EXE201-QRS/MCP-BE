@@ -10,6 +10,7 @@ import { ZodSerializerInterceptor } from 'nestjs-zod'
 import { SendMailToPaymentCronjob } from './cronjobs/send-mail-to-payment.cronjob'
 import { AuthModule } from './routes/auth/auth.module'
 import { BlogModule } from './routes/blog/blog.module'
+import { DashboardModule } from './routes/dashboard/dashboard.module'
 import { MediaModule } from './routes/media/media.module'
 import { PaymentModule } from './routes/payment/payment.module'
 import { QosInstanceModule } from './routes/qos-instance/qos-instance.module'
@@ -31,7 +32,8 @@ import { SharedModule } from './shared/shared.module'
     BlogModule,
     PaymentModule,
     QosInstanceModule,
-    UserModule
+    UserModule,
+    DashboardModule
   ],
   controllers: [],
   providers: [
