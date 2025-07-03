@@ -13,7 +13,8 @@ import {
 import {
   LoginBodyType,
   RegisterBodyType,
-  SendOTPBodyType
+  SendOTPBodyType,
+  UpdateMeBodyType
 } from '@/routes/auth/auth.model'
 import { AuthRepository } from '@/routes/auth/auth.repository'
 import { InvalidPasswordException } from '@/shared/error'
@@ -180,6 +181,19 @@ export class AuthService {
     return {
       data: user,
       message: 'Lấy thông tin người dùng thành công'
+    }
+  }
+
+  async updateMe({ userId, body }: { userId: number; body: UpdateMeBodyType }) {
+    const user = await this.sharedUserRepository.findUnique({
+      id: userId
+    })
+    if (!user) {
+      throw EmailNotFoundException
+    }
+    await this.sharedUserRepository.update({ id: userId }, body)
+    return {
+      message: 'Cập nhật thông tin người dùng thành công'
     }
   }
 }

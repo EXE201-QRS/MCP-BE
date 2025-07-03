@@ -1,6 +1,7 @@
 import { ActiveUser } from '@/common/decorators/active-user.decorator'
 import { GetUserProfileResDTO } from '@/routes/auth/auth.dto'
 import {
+  ChangePasswordBodyDTO,
   CreateUserBodyDTO,
   CreateUserResDTO,
   GetUserParamsDTO,
@@ -62,6 +63,18 @@ export class UserController {
     return this.userService.delete({
       id: params.userId,
       deletedById: userId
+    })
+  }
+
+  @Put('change-password')
+  @ZodSerializerDto(MessageResDTO)
+  changePassword(
+    @Body() body: ChangePasswordBodyDTO,
+    @ActiveUser('userId') userId: number
+  ) {
+    return this.userService.changePassword({
+      data: body,
+      id: userId
     })
   }
 }

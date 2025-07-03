@@ -6,7 +6,8 @@ import {
   LoginResSchema,
   RegisterBodySchema,
   RegisterResSchema,
-  SendOTPBodySchema
+  SendOTPBodySchema,
+  UpdateMeBodySchema
 } from 'src/routes/auth/auth.model'
 
 export class RegisterBodyDTO extends createZodDto(RegisterBodySchema) {}
@@ -22,3 +23,5 @@ export class LoginResDTO extends createZodDto(LoginResSchema) {}
 export class ForgotPasswordBodyDTO extends createZodDto(ForgotPasswordBodySchema) {}
 
 export class GetUserProfileResDTO extends createZodDto(GetUserProfileResSchema) {}
+
+export class UpdateMeBodyDTO extends createZodDto(UpdateMeBodySchema) {}

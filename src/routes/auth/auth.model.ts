@@ -72,6 +72,15 @@ export const GetUserProfileResSchema = z.object({
   message: z.string()
 })
 
+//update me
+export const UpdateMeBodySchema = z
+  .object({
+    name: z.string().trim().min(2).max(256),
+    phoneNumber: z.string().min(9).max(15),
+    avatar: z.string().url().optional()
+  })
+  .strict()
+
 //type
 export type RegisterBodyType = z.infer<typeof RegisterBodySchema>
 export type RegisterResType = z.infer<typeof RegisterResSchema>
@@ -81,3 +90,4 @@ export type LoginBodyType = z.infer<typeof LoginBodySchema>
 export type LoginResType = z.infer<typeof LoginResSchema>
 export type ForgotPasswordBodyType = z.infer<typeof ForgotPasswordBodySchema>
 export type GetUserProfileResType = z.infer<typeof GetUserProfileResSchema>
+export type UpdateMeBodyType = z.infer<typeof UpdateMeBodySchema>
