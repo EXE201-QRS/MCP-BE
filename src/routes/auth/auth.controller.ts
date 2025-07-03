@@ -1,15 +1,17 @@
 import { ActiveUser } from '@/common/decorators/active-user.decorator'
 import { IsPublic } from '@/common/decorators/auth.decorator'
 import {
+  ForgotPasswordBodyDTO,
   GetUserProfileResDTO,
   LoginBodyDTO,
   LoginResDTO,
   RegisterBodyDTO,
   RegisterResDTO,
-  SendOTPBodyDTO
+  SendOTPBodyDTO,
+  UpdateMeBodyDTO
 } from '@/routes/auth/auth.dto'
 import { MessageResDTO } from '@/shared/dtos/response.dto'
-import { Body, Controller, Get, Post } from '@nestjs/common'
+import { Body, Controller, Get, Post, Put } from '@nestjs/common'
 import { ZodSerializerDto } from 'nestjs-zod'
 import { AuthService } from './auth.service'
 
@@ -38,9 +40,22 @@ export class AuthController {
     return this.authService.sendOTP(body)
   }
 
+  @Post('forgot-password')
+  @IsPublic()
+  @ZodSerializerDto(MessageResDTO)
+  forgotPassword(@Body() body: ForgotPasswordBodyDTO) {
+    return this.authService.forgotPassword(body)
+  }
+
   @Get('me')
   @ZodSerializerDto(GetUserProfileResDTO)
   me(@ActiveUser('userId') userId: number) {
     return this.authService.getMe(userId)
+  }
+
+  @Put('me')
+  @ZodSerializerDto(MessageResDTO)
+  updateMe(@ActiveUser('userId') userId: number, @Body() body: UpdateMeBodyDTO) {
+    return this.authService.updateMe({ userId, body })
   }
 }

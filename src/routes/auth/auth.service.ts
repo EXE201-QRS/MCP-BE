@@ -11,9 +11,11 @@ import {
   OTPExpiredException
 } from '@/routes/auth/auth.error'
 import {
+  ForgotPasswordBodyType,
   LoginBodyType,
   RegisterBodyType,
-  SendOTPBodyType
+  SendOTPBodyType,
+  UpdateMeBodyType
 } from '@/routes/auth/auth.model'
 import { AuthRepository } from '@/routes/auth/auth.repository'
 import { InvalidPasswordException } from '@/shared/error'
@@ -180,6 +182,57 @@ export class AuthService {
     return {
       data: user,
       message: 'Lấy thông tin người dùng thành công'
+    }
+  }
+
+  async updateMe({ userId, body }: { userId: number; body: UpdateMeBodyType }) {
+    const user = await this.sharedUserRepository.findUnique({
+      id: userId
+    })
+    if (!user) {
+      throw EmailNotFoundException
+    }
+    await this.sharedUserRepository.update({ id: userId }, body)
+    return {
+      message: 'Cập nhật thông tin người dùng thành công'
+    }
+  }
+
+  async forgotPassword(body: ForgotPasswordBodyType) {
+    const { email, code, newPassword } = body
+    // 1. Kiểm tra email đã tồn tại trong database chưa
+    const user = await this.sharedUserRepository.findUnique({
+      email
+    })
+    if (!user) {
+      throw EmailNotFoundException
+    }
+    //2. Kiểm tra mã OTP có hợp lệ không
+    await this.validateVerificationCode({
+      email,
+      code,
+      type: TypeOfVerificationCode.FORGOT_PASSWORD
+    })
+    //3. Cập nhật lại mật khẩu mới và xóa đi OTP
+    const hashedPassword = await this.hashingService.hash(newPassword)
+    await Promise.all([
+      this.sharedUserRepository.update(
+        { id: user.id },
+        {
+          password: hashedPassword,
+          updatedById: user.id
+        }
+      ),
+      this.authRepository.deleteVerificationCode({
+        email_code_type: {
+          email: body.email,
+          code: body.code,
+          type: TypeOfVerificationCode.FORGOT_PASSWORD
+        }
+      })
+    ])
+    return {
+      message: 'Đổi mật khẩu thành công'
     }
   }
 }

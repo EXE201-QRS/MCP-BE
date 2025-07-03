@@ -47,6 +47,23 @@ export const GetUserParamsSchema = z
   })
   .strict()
 
+export const ChangePasswordBodySchema = z
+  .object({
+    oldPassword: z.string().min(6).max(100),
+    newPassword: z.string().min(6).max(100),
+    confirmPassword: z.string().min(6).max(100)
+  })
+  .strict()
+  .superRefine(({ confirmPassword, newPassword }, ctx) => {
+    if (confirmPassword !== newPassword) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Mật khẩu mới không khớp',
+        path: ['confirmPassword']
+      })
+    }
+  })
+
 //types
 export type CreateUserBodyType = z.infer<typeof CreateUserBodySchema>
 export type CreateUserResType = z.infer<typeof CreateUserResSchema>
@@ -54,4 +71,5 @@ export type UpdateUserBodyType = z.infer<typeof UpdateUserBodySchema>
 export type UpdateUserResType = z.infer<typeof UpdateUserResSchema>
 export type GetUsersResType = z.infer<typeof GetUsersResSchema>
 export type GetUserParamsType = z.infer<typeof GetUserParamsSchema>
+export type ChangePasswordBodyType = z.infer<typeof ChangePasswordBodySchema>
 export type UserType = z.infer<typeof UserSchema>
