@@ -1,7 +1,9 @@
 import { ActiveUser } from '@/common/decorators/active-user.decorator'
 import { IsPublic } from '@/common/decorators/auth.decorator'
+import envConfig from '@/config/env.config'
 import {
   ForgotPasswordBodyDTO,
+  GetAuthorizationUrlResDTO,
   GetUserProfileResDTO,
   LoginBodyDTO,
   LoginResDTO,
@@ -10,14 +12,19 @@ import {
   SendOTPBodyDTO,
   UpdateMeBodyDTO
 } from '@/routes/auth/auth.dto'
+import { GoogleService } from '@/routes/auth/google.service'
 import { MessageResDTO } from '@/shared/dtos/response.dto'
-import { Body, Controller, Get, Post, Put } from '@nestjs/common'
+import { Body, Controller, Get, Post, Put, Query, Res } from '@nestjs/common'
+import { Response } from 'express'
 import { ZodSerializerDto } from 'nestjs-zod'
 import { AuthService } from './auth.service'
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly googleService: GoogleService
+  ) {}
 
   @Post('login')
   @IsPublic()
@@ -57,5 +64,32 @@ export class AuthController {
   @ZodSerializerDto(MessageResDTO)
   updateMe(@ActiveUser('userId') userId: number, @Body() body: UpdateMeBodyDTO) {
     return this.authService.updateMe({ userId, body })
+  }
+
+  //oauth
+  @Get('google-link')
+  @IsPublic()
+  @ZodSerializerDto(GetAuthorizationUrlResDTO)
+  getAuthorizationUrl() {
+    return this.googleService.getAuthorizationUrl()
+  }
+
+  @Get('google/callback')
+  @IsPublic()
+  async googleCallback(@Query('code') code: string, @Res() res: Response) {
+    try {
+      const data = await this.googleService.googleCallback(code)
+      return res.redirect(
+        `${envConfig.GOOGLE_CLIENT_REDIRECT_URI}?sessionToken=${data.sessionToken}`
+      )
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Đã xảy ra lỗi khi đăng nhập bằng Google, vui lòng thử lại bằng cách khác'
+      return res.redirect(
+        `${envConfig.GOOGLE_CLIENT_REDIRECT_URI}?errorMessage=${message}`
+      )
+    }
   }
 }
