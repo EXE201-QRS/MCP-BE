@@ -19,7 +19,10 @@ export class AuthRepository {
   }
 
   async createUser(
-    user: Pick<UserType, 'email' | 'name' | 'password' | 'phoneNumber'>
+    user: Pick<
+      UserType,
+      'email' | 'name' | 'password' | 'phoneNumber' | 'roleName' | 'avatar'
+    >
   ): Promise<Omit<UserType, 'password'>> {
     return this.prismaService.user.create({
       data: user,

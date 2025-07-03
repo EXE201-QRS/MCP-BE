@@ -81,6 +81,10 @@ export const UpdateMeBodySchema = z
   })
   .strict()
 
+export const GetAuthorizationUrlResSchema = z.object({
+  url: z.string().url()
+})
+
 //type
 export type RegisterBodyType = z.infer<typeof RegisterBodySchema>
 export type RegisterResType = z.infer<typeof RegisterResSchema>
@@ -91,3 +95,4 @@ export type LoginResType = z.infer<typeof LoginResSchema>
 export type ForgotPasswordBodyType = z.infer<typeof ForgotPasswordBodySchema>
 export type GetUserProfileResType = z.infer<typeof GetUserProfileResSchema>
 export type UpdateMeBodyType = z.infer<typeof UpdateMeBodySchema>
+export type GetAuthorizationUrlResType = z.infer<typeof GetAuthorizationUrlResSchema>

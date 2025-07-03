@@ -36,13 +36,13 @@ const configSchema = z.object({
   PAYOS_API_KEY: z.string(),
   PAYOS_CLIENT_ID: z.string(),
   PAYOS_CHECKSUM_KEY: z.string(),
-
+  //Google OAuth
+  GOOGLE_CLIENT_ID: z.string(),
+  GOOGLE_CLIENT_SECRET: z.string(),
+  GOOGLE_REDIRECT_URI: z.string(),
   //FE
-  FE_URL: z.string()
-  // GOOGLE_CLIENT_ID: z.string(),
-  // GOOGLE_CLIENT_SECRET: z.string(),
-  // GOOGLE_REDIRECT_URI: z.string(),
-  // GOOGLE_CLIENT_REDIRECT_URI: z.string(),
+  FE_URL: z.string(),
+  GOOGLE_CLIENT_REDIRECT_URI: z.string()
 })
 
 const configServer = configSchema.safeParse(process.env)
