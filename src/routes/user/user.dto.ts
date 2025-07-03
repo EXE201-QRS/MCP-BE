@@ -1,4 +1,5 @@
 import {
+  ChangePasswordBodySchema,
   CreateUserBodySchema,
   CreateUserResSchema,
   GetUserParamsSchema,
@@ -19,3 +20,5 @@ export class CreateUserResDTO extends createZodDto(CreateUserResSchema) {}
 export class UpdateUserBodyDTO extends createZodDto(UpdateUserBodySchema) {}
 
 export class UpdateUserResDTO extends createZodDto(UpdateUserResSchema) {}
+
+export class ChangePasswordBodyDTO extends createZodDto(ChangePasswordBodySchema) {}

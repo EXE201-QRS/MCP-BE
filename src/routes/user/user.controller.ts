@@ -1,6 +1,7 @@
 import { ActiveUser } from '@/common/decorators/active-user.decorator'
 import { GetUserProfileResDTO } from '@/routes/auth/auth.dto'
 import {
+  ChangePasswordBodyDTO,
   CreateUserBodyDTO,
   CreateUserResDTO,
   GetUserParamsDTO,
@@ -24,6 +25,19 @@ export class UserController {
     return this.userService.list({
       page: query.page,
       limit: query.limit
+    })
+  }
+
+  // 📝 Route change-password PHẢI đặt TRƯỚC :userId để tránh conflict
+  @Put('change-password')
+  @ZodSerializerDto(MessageResDTO)
+  changePassword(
+    @Body() body: ChangePasswordBodyDTO,
+    @ActiveUser('userId') userId: number
+  ) {
+    return this.userService.changePassword({
+      data: body,
+      id: userId
     })
   }
 

@@ -9,7 +9,6 @@ import { ScheduleModule } from '@nestjs/schedule'
 import { ZodSerializerInterceptor } from 'nestjs-zod'
 import { SendMailToPaymentCronjob } from './cronjobs/send-mail-to-payment.cronjob'
 import { AuthModule } from './routes/auth/auth.module'
-import { BlogModule } from './routes/blog/blog.module'
 import { DashboardModule } from './routes/dashboard/dashboard.module'
 import { MediaModule } from './routes/media/media.module'
 import { PaymentModule } from './routes/payment/payment.module'
@@ -29,7 +28,6 @@ import { SharedModule } from './shared/shared.module'
     SubscriptionModule,
     ReviewModule,
     MediaModule,
-    BlogModule,
     PaymentModule,
     QosInstanceModule,
     UserModule,

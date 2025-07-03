@@ -3,7 +3,11 @@ import {
   RoleNotFoundException,
   UserAlreadyExistsException
 } from '@/routes/user/user.error'
-import { CreateUserBodyType, UpdateUserBodyType } from '@/routes/user/user.model'
+import {
+  ChangePasswordBodyType,
+  CreateUserBodyType,
+  UpdateUserBodyType
+} from '@/routes/user/user.model'
 import { UserRepository } from '@/routes/user/user.repo'
 import { NotFoundRecordException } from '@/shared/error'
 import {
@@ -147,6 +151,31 @@ export class UserService {
         throw NotFoundRecordException
       }
       throw error
+    }
+  }
+
+  //change password
+  async changePassword({ id, data }: { id: number; data: ChangePasswordBodyType }) {
+    const user = await this.sharedUserRepository.findUnique({
+      id
+    })
+    if (!user) {
+      throw NotFoundRecordException
+    }
+    const isMatch = await this.hashingService.compare(data.oldPassword, user.password)
+    if (!isMatch) {
+      throw new Error('Mật khẩu cũ không đúng')
+    }
+    const hashedNewPassword = await this.hashingService.hash(data.newPassword)
+    await this.sharedUserRepository.update(
+      { id },
+      {
+        password: hashedNewPassword,
+        updatedById: id
+      }
+    )
+    return {
+      message: 'Đổi mật khẩu thành công'
     }
   }
 
