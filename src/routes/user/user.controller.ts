@@ -28,6 +28,19 @@ export class UserController {
     })
   }
 
+  // 📝 Route change-password PHẢI đặt TRƯỚC :userId để tránh conflict
+  @Put('change-password')
+  @ZodSerializerDto(MessageResDTO)
+  changePassword(
+    @Body() body: ChangePasswordBodyDTO,
+    @ActiveUser('userId') userId: number
+  ) {
+    return this.userService.changePassword({
+      data: body,
+      id: userId
+    })
+  }
+
   @Get(':userId')
   @ZodSerializerDto(GetUserProfileResDTO)
   findById(@Param() params: GetUserParamsDTO) {
@@ -63,18 +76,6 @@ export class UserController {
     return this.userService.delete({
       id: params.userId,
       deletedById: userId
-    })
-  }
-
-  @Put('change-password')
-  @ZodSerializerDto(MessageResDTO)
-  changePassword(
-    @Body() body: ChangePasswordBodyDTO,
-    @ActiveUser('userId') userId: number
-  ) {
-    return this.userService.changePassword({
-      data: body,
-      id: userId
     })
   }
 }

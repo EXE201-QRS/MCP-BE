@@ -54,7 +54,7 @@ export class AuthController {
   }
 
   @Put('me')
-  @ZodSerializerDto(UpdateMeBodyDTO)
+  @ZodSerializerDto(MessageResDTO)
   updateMe(@ActiveUser('userId') userId: number, @Body() body: UpdateMeBodyDTO) {
     return this.authService.updateMe({ userId, body })
   }
