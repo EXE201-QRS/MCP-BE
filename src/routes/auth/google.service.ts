@@ -1,4 +1,4 @@
-import { Role } from '@/common/constants/role'
+import { Role } from '@/common/constants/auth.constant'
 import envConfig from '@/config/env.config'
 import { GoogleUserInfoError } from '@/routes/auth/auth.error'
 import { AuthRepository } from '@/routes/auth/auth.repository'
@@ -62,7 +62,7 @@ export class GoogleService {
           email: data.email,
           name: data.name ?? '',
           password: hashedPassword,
-          phoneNumber: '',
+          phoneNumber: null, // Set to null instead of empty string
           roleName: Role.CUSTOMER,
           avatar: data.picture || null
         })
